@@ -195,7 +195,7 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
     }
     
     try {
-        const response = await fetch(`http://localhost:8000${endpoint}`, options);
+        const response = await fetch(`https://ngaturin-kappa.vercel.app`, options);
         const result = await response.json();
         
         if (!response.ok) {
