@@ -317,17 +317,6 @@ def create_pocket(
 
     return new_pocket
 
-# GET TRANSACTIONS BY POCKET
-@app.get("/api/pockets/{pocket_id}/transactions")
-def get_transactions(pocket_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-
-    txs = db.query(Transaction).filter(
-        Transaction.pocket_id == pocket_id,
-        Transaction.user_id == current_user.id
-    ).all()
-
-    return txs
-
 # DELETE POCKET
 # This endpoint deletes a pocket based on pocket ID
 
