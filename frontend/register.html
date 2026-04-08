@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create your Ngaturin account">
+    <title>Create Account - Ngaturin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .register-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-bg);
+            padding: var(--spacing-2xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-3xl);
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .register-card {
+            background-color: var(--color-card);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 450px;
+            border: 3px solid var(--color-dark);
+            /* Ensure card stands out against potential image overlap */
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-page">
+        <!-- Image Stuck to Right Side -->
+        <div
+            style="position: absolute; top: 0; right: 0; bottom: 0; height: 100%; width: 50%; z-index: 1; display: flex; justify-content: flex-end;">
+            <img src="assets/Piggy Bank (Create Account and Goal Saver) Page.png" alt="Piggy Bank"
+                style="height: 100%; width: auto; object-fit: cover;">
+        </div>
+
+        <div class="register-container">
+            <!-- Form Card (Centered/Left) -->
+            <div class="register-card fade-in" style="margin-right: auto; margin-left: var(--spacing-3xl);">
+                <div class="flex-between mb-lg">
+                    <h2 style="color: var(--color-dark); font-size: var(--font-size-3xl);">Create an account</h2>
+                    <div style="text-align: right;">
+                        <p style="font-size: var(--font-size-sm); color: var(--color-text-light);">
+                            Already have an account?
+                        </p>
+                        <a href="login.html"
+                            style="color: var(--color-primary); font-weight: 600; font-size: var(--font-size-base);">
+                            Sign In
+                        </a>
+                    </div>
+                </div>
+
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" id="username" name="username" class="form-input"
+                            placeholder="Choose a username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="example@gmail.com"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Password"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input"
+                            placeholder="Confirm Password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-full btn-large mt-md">
+                        Create Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Clear previous errors
+            clearError(document.getElementById('username'));
+            clearError(document.getElementById('email'));
+            clearError(document.getElementById('password'));
+            clearError(document.getElementById('confirmPassword'));
+
+            // Validation
+            if (!username || username.length < 3) {
+                showError(document.getElementById('username'), 'Username must be at least 3 characters');
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                showError(document.getElementById('email'), 'Please enter a valid email address');
+                return;
+            }
+
+            if (!validatePassword(password)) {
+                showError(document.getElementById('password'), 'Password must be at least 6 characters');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError(document.getElementById('confirmPassword'), 'Passwords do not match');
+                return;
+            }
+
+            try {
+                // API call to register endpoint
+                const response = await apiRequest('/api/register', 'POST', {
+                    username: username,
+                    email: email,
+                    password: password
+                });
+
+                // Show success message
+                showToast('Account created successfully! Redirecting to login...', 'success');
+
+                // Redirect to login page
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+
+            } catch (error) {
+                showToast(error.message || 'Registration failed. Please try again.', 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

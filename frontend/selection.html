@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Choose your financial tool">
+    <title>Welcome - Ngaturin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .selection-page {
+            min-height: 100vh;
+            background-image: url('assets/Backgound Green Grid (After Create Acc) Page).png');
+            background-size: cover;
+            background-position: center;
+            padding-top: 100px;
+        }
+
+        .selection-header {
+            text-align: center;
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-3xl);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+        }
+
+        .selection-card {
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: 3px solid transparent;
+        }
+
+        .selection-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--color-primary);
+        }
+
+        .selection-card img {
+            max-width: 250px;
+            margin: 0 auto var(--spacing-lg);
+        }
+
+        .logo-top {
+            position: absolute;
+            top: var(--spacing-xl);
+            left: var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--color-dark);
+            font-weight: 700;
+            font-size: var(--font-size-xl);
+        }
+
+        .logo-top img {
+            width: 48px;
+            height: 48px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: var(--spacing-xl);
+            right: var(--spacing-xl);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="selection-page">
+        <div class="logo-top">
+            <img src="assets/Logo Ngaturin.jpg" alt="Ngaturin Logo">
+            <span>Ngaturin</span>
+        </div>
+
+        <button class="btn btn-secondary logout-btn" onclick="logout()">Logout</button>
+
+        <div class="container">
+            <div class="selection-header fade-in">
+                <h1 style="color: var(--color-dark); margin-bottom: var(--spacing-md);">
+                    Welcome to Ngaturin!
+                </h1>
+                <p style="font-size: var(--font-size-xl); color: var(--color-text-light);">
+                    Choose how you'd like to manage your finances today
+                </p>
+            </div>
+
+            <div class="selection-grid">
+                <div class="selection-card slide-up" onclick="window.location.href='aicoach.html'">
+                    <img src="assets/AI Robot (Solution) Page.png" alt="AI Coach Robot">
+                    <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-md);">
+                        AI Coach
+                    </h3>
+                    <p style="color: var(--color-text-light); margin-bottom: var(--spacing-lg);">
+                        Your personal finance buddy here to answer all your money questions
+                    </p>
+                    <button class="btn btn-primary btn-large">Start Here</button>
+                </div>
+
+                <div class="selection-card slide-up" style="animation-delay: 0.2s;"
+                    onclick="window.location.href='goalsaver.html'">
+                    <img src="assets/Piggy Bank (Create Account and Goal Saver) Page.png" alt="Piggy Bank">
+                    <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-md);">
+                        Goal Saver
+                    </h3>
+                    <p style="color: var(--color-text-light); margin-bottom: var(--spacing-lg);">
+                        Set financial goals and track your savings progress step by step
+                    </p>
+                    <button class="btn btn-primary btn-large">Start Saving</button>
+                </div>
+
+                <!-- New Premium Feature: Pocket Notes -->
+                <div class="selection-card slide-up" style="animation-delay: 0.4s; position: relative;"
+                    onclick="handlePocketNotesClick()">
+                    <div
+                        style="position: absolute; top: -15px; right: -15px; background: gold; color: #5a4a00; padding: 5px 15px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transform: rotate(15deg); z-index: 1;">
+                        PREMIUM 👑
+                    </div>
+                    <img src="assets/money in pocket .jpeg" alt="Pocket Notes">
+                    <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-md);">
+                        Pocket Notes
+                    </h3>
+                    <p style="color: var(--color-text-light); margin-bottom: var(--spacing-lg);">
+                        Organize your money into digital jars for smarter budgeting
+                    </p>
+                    <button class="btn btn-primary btn-large">Open Pockets</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="premiumModal" class="modal-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div class="modal-card"
+            style="background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 500px; position: relative;">
+            <button onclick="closeModal()"
+                style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            <div style="font-size: 60px; margin-bottom: 20px;">👑</div>
+            <h2 style="color: var(--color-primary);">Unlock Pocket Notes</h2>
+            <p style="color: var(--color-text-light); margin-bottom: 30px;">
+                Upgrade to Premium to access Digital Jars, Unlimited Pockets, and Advanced Budgeting tools!
+            </p>
+            <button class="btn btn-primary btn-large" onclick="unlockPremium()"
+                style="width: 100%; background: gold; color: #5a4a00;">Get Premium Now</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+<script src="script.js"></script>
+
+<script>
+// ==========================
+// CHECK LOGIN
+// ==========================
+const token = localStorage.getItem("token");
+
+if (!token || token === "undefined" || token === "null") {
+    window.location.href = "login.html";
+}
+
+
+// ==========================
+// LOGOUT
+// ==========================
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+
+
+// ==========================
+// POCKET NOTES (WITH PREMIUM)
+// ==========================
+function handlePocketNotesClick() {
+
+    // get user (for testing premium)
+    let user = JSON.parse(sessionStorage.getItem("activeUser"));
+
+    // if no user → create dummy
+    if (!user) {
+        user = { isPremium: false };
+        sessionStorage.setItem("activeUser", JSON.stringify(user));
+    }
+
+    if (user.isPremium) {
+        window.location.href = "pocketnotes.html";
+    } else {
+        // show modal
+        document.getElementById('premiumModal').style.display = 'flex';
+    }
+}
+
+
+// ==========================
+// CLOSE MODAL
+// ==========================
+function closeModal() {
+    document.getElementById('premiumModal').style.display = 'none';
+}
+
+
+// ==========================
+// UNLOCK PREMIUM (TEST MODE)
+// ==========================
+function unlockPremium() {
+
+    let user = JSON.parse(sessionStorage.getItem("activeUser")) || {};
+    user.isPremium = true;
+
+    sessionStorage.setItem("activeUser", JSON.stringify(user));
+
+    showToast('Premium Unlocked! 👑', 'success');
+
+    closeModal();
+
+    setTimeout(() => {
+        window.location.href = "pocketnotes.html";
+    }, 800);
+}
+</script>
+</body>
+
+</html>

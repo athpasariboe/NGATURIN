@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Set and track your financial goals">
+    <title>Goal Saver - Ngaturin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .goalsaver-page {
+            min-height: 100vh;
+            background-image: linear-gradient(135deg, #E8F4EA 0%, #F7F9F2 100%);
+            padding-top: 100px;
+            padding-bottom: var(--spacing-2xl);
+        }
+
+        .goalsaver-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .goalsaver-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--spacing-3xl);
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .goalsaver-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+
+        .sidebar-card {
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+        }
+
+        .sidebar-card img {
+            max-width: 200px;
+            margin: 0 auto var(--spacing-md);
+        }
+
+        .goalsaver-main {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xl);
+        }
+
+        .goal-form-card {
+            background: var(--color-card);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-lg);
+            border: 3px solid var(--color-dark);
+        }
+
+        .goal-item {
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        .goal-info h4 {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .goal-meta {
+            display: flex;
+            gap: var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-light);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .calculation-display {
+            background: #E8F4EA;
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-md);
+            display: none;
+        }
+
+        .calculation-display.active {
+            display: block;
+        }
+
+        .logo-top {
+            position: absolute;
+            top: var(--spacing-xl);
+            left: var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--color-dark);
+            font-weight: 700;
+            font-size: var(--font-size-xl);
+        }
+
+        
+    .logo-top img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,0.4);
+
+    display:none;
+
+    align-items:center;
+    justify-content:center;
+
+    z-index:999;
+}
+
+.modal-card{
+    background:white;
+    padding:30px;
+    border-radius:16px;
+    width:320px;
+    text-align:center;
+    box-shadow:0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-card h3{
+    margin-bottom:10px;
+}
+
+.modal-card input{
+    margin-top:10px;
+}
+
+.modal-actions{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+    justify-content:center;
+}
+</style>
+</head>
+
+
+<body>
+    <div class="goalsaver-page">
+        <div class="logo-top">
+            <img src="assets/Logo Ngaturin.jpg" alt="Ngaturin Logo">
+            <span>Ngaturin</span>
+        </div>
+
+        <div class="back-btn" onclick="window.location.href='selection.html'">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+            </svg>
+        </div>
+
+        <div class="container">
+            <div class="goalsaver-header fade-in">
+                <h1 style="color: var(--color-dark); margin-bottom: var(--spacing-sm);">
+                    Goal Saver
+                </h1>
+                <p
+                    style="font-size: var(--font-size-2xl); color: var(--color-primary); font-style: italic; margin-bottom: var(--spacing-md);">
+                    "Your dream. Your plan. Your savings."
+                </p>
+                <p style="font-size: var(--font-size-lg); color: var(--color-text-light);">
+                    Create a goal and watch your savings grow.
+                </p>
+            </div>
+
+            <div class="goalsaver-content">
+                <div class="goalsaver-sidebar slide-up">
+                    <div class="sidebar-card">
+                        <h3 style="color: var(--color-dark); margin-bottom: var(--spacing-md);">
+                            Ready to achieve your goal?
+                        </h3>
+                        <button class="btn btn-primary btn-large" onclick="scrollToForm()">
+                            Start Saving
+                        </button>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <img src="assets/Piggy Bank (Create Account and Goal Saver) Page.png" alt="Piggy Bank">
+                    </div>
+                </div>
+
+                <div class="goalsaver-main slide-up">
+                    <!-- Goal Creation Form -->
+                    <div class="goal-form-card" id="goalForm">
+                        <h3 style="color: var(--color-dark); margin-bottom: var(--spacing-lg);">
+                            Set your goal!
+                        </h3>
+
+                        <form id="createGoalForm">
+                            <div class="form-group">
+                                <label for="goalName" class="form-label">Goal Name</label>
+                                <input type="text" id="goalName" class="form-input"
+                                    placeholder="What are you saving for?" required>
+                                <p
+                                    style="font-size: var(--font-size-xs); color: var(--color-text-light); margin-top: var(--spacing-xs);">
+                                    e.g., "Buy a new phone"
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="targetAmount" class="form-label">Target Amount</label>
+                                <input type="text" id="targetAmount" class="form-input"
+                                    placeholder="How much do you want to save?" required min="1000"
+                                    oninput="calculateSavings()">
+                                <p style="font-size:12px;color:gray;">Currency: IDR (Rp)
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="deadline" class="form-label">Deadline</label>
+                                <input type="date" id="deadline" class="form-input" required
+                                    oninput="calculateSavings()">
+                                <p
+                                    style="font-size: var(--font-size-xs); color: var(--color-text-light); margin-top: var(--spacing-xs);">
+                                    When do you want to reach it?
+                                </p>
+                            </div>
+
+                            <div class="calculation-display" id="calculationDisplay">
+                                <h4 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">
+                                    💡 Your Savings Plan
+                                </h4>
+                                <p id="dailySavings" style="margin-bottom: var(--spacing-xs);"></p>
+                                <p id="weeklySavings" style="margin-bottom: var(--spacing-xs);"></p>
+                                <p id="monthlySavings"></p>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-large w-full mt-lg">
+                                Create Goal
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Goals List -->
+                    <div>
+                        <h3 style="color: var(--color-dark); margin-bottom: var(--spacing-lg);">
+
+                    <div class="dashboard-summary">
+
+                    <div class="summary-card">
+                        <div class="summary-number" id="totalSaved">Rp 0</div>
+                        <div class="summary-label">Total Saved</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-number" id="totalGoals">0</div>
+                        <div class="summary-label">Total Goals</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-number" id="completedGoals">0</div>
+                        <div class="summary-label">Completed</div>
+                    </div>
+
+                    </div>
+                            Your Active Goals
+                        </h3>
+                        <div id="goalsList" style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                            <p style="color: var(--color-text-light); text-align: center; padding: var(--spacing-xl);">
+                                No goals yet. Create your first goal above!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD SAVINGS MODAL -->
+
+<div id="savingsModal" class="modal">
+
+<div class="modal-card">
+
+<h3>Add Savings</h3>
+
+<p>Enter amount to add</p>
+
+<input 
+id="savingsAmount"
+type="text"
+class="form-input"
+placeholder="Enter amount"
+/>
+
+<div id="savingsError" class="input-error"></div>
+
+<div class="modal-actions">
+
+<button class="btn btn-secondary"
+onclick="closeSavingsModal()">
+Cancel
+</button>
+
+<button class="btn btn-primary"
+onclick="submitSavings()">
+Add Savings
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ========================================
+DELETE GOAL MODAL
+======================================== -->
+
+<div id="deleteModal" class="modal">
+
+  <div class="modal-card">
+
+    <h3>Delete Goal</h3>
+
+    <p>Are you sure you want to delete this goal?</p>
+
+    <div class="modal-actions">
+
+      <button class="btn btn-secondary"
+      onclick="closeDeleteModal()">
+      Cancel
+      </button>
+
+      <button class="btn btn-primary"
+      onclick="confirmDeleteGoal()">
+      Delete
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+    <script src="script.js"></script>
+    <script src="goalsaver.js"></script>
+    <script>
+        // ==========================
+        // CHECK LOGIN TOKEN
+        // ==========================
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+    </script>
+
+</body>
+
+</html>
