@@ -190,16 +190,23 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
         }
     };
     
+    // --- TAMBAHAN BARU: Selipkan Karcis (Token) jika user sudah login ---
+    const token = getToken();
+    if (token) {
+        options.headers['Authorization'] = `Bearer ${token}`;
+    }
+    // -------------------------------------------------------------------
+
     if (data) {
         options.body = JSON.stringify(data);
     }
     
     try {
-        const response = await fetch(`https://ngaturin-kappa.vercel.app`, options);
+        const response = await fetch(`https://ngaturin-kappa.vercel.app${endpoint}`, options);
         const result = await response.json();
         
         if (!response.ok) {
-            throw new Error(result.message || 'Request failed');
+            throw new Error(result.detail || result.message || 'Request failed');
         }
         
         return result;
