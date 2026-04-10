@@ -18,7 +18,7 @@ var selectedPocketId = null;
 // 🌐 API — LOAD TRANSACTIONS
 // ==============================
 async function loadTransactionsForPocket(pocketId) {
-    const res = await fetch(`http://127.0.0.1:8000/api/pockets/${pocketId}/transactions`, {
+    const res = await fetch(`https://ngaturin-kappa.vercel.app/api/login:8000/api/pockets/${pocketId}/transactions`, {
         headers: {
             Authorization: "Bearer " + getToken()
         }
@@ -33,7 +33,7 @@ async function loadTransactionsForPocket(pocketId) {
 // ==============================
 async function loadPockets() {
 
-    const res = await fetch("http://127.0.0.1:8000/api/pockets", {
+    const res = await fetch("https://ngaturin-kappa.vercel.app/api/login/api/pockets", {
         headers: {
             Authorization: "Bearer " + getToken()
         }
@@ -86,7 +86,7 @@ async function submitTransaction() {
         return;
     }
 
-    await fetch("http://127.0.0.1:8000/api/transactions", {
+    await fetch("https://ngaturin-kappa.vercel.app/api/login/api/transactions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
