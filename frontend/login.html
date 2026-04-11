@@ -118,12 +118,6 @@
                     <button type="submit" class="btn btn-primary w-full btn-large mt-md">
                         Sign In
                     </button>
-                    <div class="mt-md text-center">
-                        <button type="button" onclick="guestLogin()" class="btn btn-secondary w-full"
-                            style="border-style: dashed;">
-                            Guest Login (No Database Demo)
-                        </button>
-                    </div>
                 </form>
 
                 <p class="text-center mt-lg" style="color: var(--color-text-light); font-size: var(--font-size-sm);">
@@ -186,15 +180,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 });
 
 
-// ==========================
-// GUEST LOGIN
-// ==========================
 
-function guestLogin() {
-    localStorage.setItem("token", "guest-token");
-    alert("Logged in as Guest!");
-    window.location.href = "selection.html";
-}
 
 </script>
 </body>
