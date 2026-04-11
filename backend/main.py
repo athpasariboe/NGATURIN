@@ -8,38 +8,19 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
 from database import engine, Base, SessionLocal
-from models import User, Goal, Savings, Pocket, Transaction, Order
+from models import User, Goal, Savings, Pocket, Transaction
 from auth import hash_password, verify_password, create_access_token
 from uuid import UUID
 from typing import Literal
 from datetime import datetime
 
 import os
-import midtransclient
-from fastapi import Request
 
 
 
 # CREATE DATABASE TABLES
 
 Base.metadata.create_all(bind=engine)
-
-# MIDTRANS CONFIG
-MIDTRANS_SERVER_KEY = os.getenv("MIDTRANS_SERVER_KEY")
-MIDTRANS_CLIENT_KEY = os.getenv("MIDTRANS_CLIENT_KEY")
-MIDTRANS_IS_PRODUCTION = os.getenv("MIDTRANS_IS_PRODUCTION", "False").lower() == "true"
-
-# Initialize Snap only if keys are present to avoid startup crashes
-snap = None
-if MIDTRANS_SERVER_KEY and MIDTRANS_CLIENT_KEY:
-    try:
-        snap = midtransclient.Snap(
-            is_production=MIDTRANS_IS_PRODUCTION,
-            server_key=MIDTRANS_SERVER_KEY,
-            client_key=MIDTRANS_CLIENT_KEY
-        )
-    except Exception as e:
-        print(f"Midtrans Init Error: {e}")
 
 
 
@@ -113,14 +94,6 @@ def get_current_user(
     return user
 
 
-
-@app.get("/api/me")
-def get_me(current_user: User = Depends(get_current_user)):
-    return {
-        "id": str(current_user.id),
-        "email": current_user.email,
-        "is_premium": current_user.is_premium
-    }
 
 # REQUEST MODELS
 
@@ -507,69 +480,3 @@ def get_goal_savings(
         .all()
 
     return savings
-
-# ==========================
-# PAYMENT ENDPOINTS
-# ==========================
-
-@app.post("/api/payment/checkout")
-def create_checkout(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.is_premium:
-        raise HTTPException(status_code=400, detail="You are already premium!")
-        
-    order_id = f"PREM-{str(current_user.id)[:8]}-{int(datetime.utcnow().timestamp())}"
-    
-    # Save pending Order to DB
-    new_order = Order(
-        order_id=order_id,
-        user_id=current_user.id,
-        amount=50000,
-        status="pending"
-    )
-    db.add(new_order)
-    db.commit()
-    
-    # Create Snap Token
-    param = {
-        "transaction_details": {
-            "order_id": order_id,
-            "gross_amount": 50000
-        },
-        "customer_details": {
-            "email": current_user.email
-        }
-    }
-    
-    if not snap:
-        raise HTTPException(status_code=500, detail="Midtrans is not configured on the server.")
-
-    try:
-        transaction = snap.create_transaction(param)
-        return {"token": transaction["token"]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/api/payment/webhook")
-async def payment_webhook(request: Request, db: Session = Depends(get_db)):
-    payload = await request.json()
-    
-    order_id = payload.get("order_id")
-    status = payload.get("transaction_status")
-    
-    if not order_id:
-        return {"status": "ignored"}
-        
-    order = db.query(Order).filter(Order.order_id == order_id).first()
-    if order:
-        order.status = status
-        db.commit()
-        
-        # If transaction Successful / Settled
-        if status == "settlement" or status == "capture":
-            user = db.query(User).filter(User.id == order.user_id).first()
-            if user:
-                user.is_premium = True
-                db.commit()
-                
-    return {"status": "ok"}

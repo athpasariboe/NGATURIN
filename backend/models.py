@@ -1,5 +1,5 @@
 # IMPORT LIBRARIES
-from sqlalchemy import Column, String, Float, ForeignKey, DateTime, Boolean, Integer
+from sqlalchemy import Column, String, Float, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -16,10 +16,8 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True)
     password = Column(String)
-    is_premium = Column(Boolean, default=False)
 
     goals = relationship("Goal", back_populates="owner")
-    orders = relationship("Order", back_populates="user")
 
 
 # GOAL MODEL
@@ -97,16 +95,3 @@ class Transaction(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     pocket = relationship("Pocket", back_populates="transactions")
-
-# ORDER MODEL (MIDTRANS)
-
-class Order(Base):
-    __tablename__ = "orders"
-
-    order_id = Column(String, primary_key=True) # Ex: "trx-user-uuid"
-    amount = Column(Integer)
-    status = Column(String, default="pending") # pending, settlement, expire
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    user = relationship("User", back_populates="orders")
