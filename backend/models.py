@@ -1,5 +1,5 @@
 # IMPORT LIBRARIES
-from sqlalchemy import Column, String, Float, ForeignKey, DateTime
+from sqlalchemy import Column, String, Float, ForeignKey, DateTime, Boolean, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -16,8 +16,10 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True)
     password = Column(String)
+    is_premium = Column(Boolean, default=False)
 
     goals = relationship("Goal", back_populates="owner")
+    orders = relationship("Order", back_populates="user")
 
 
 # GOAL MODEL

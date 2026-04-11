@@ -13,6 +13,8 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Midtrans Snap -->
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="Mid-client-xd3dw8uARzRF11B3"></script>
     <style>
         .selection-page {
             min-height: 100vh;
@@ -212,13 +214,28 @@
 
 <script>
 // ==========================
-// CHECK LOGIN
+// CHECK LOGIN & FETCH USER
 // ==========================
 const token = localStorage.getItem("token");
+let currentUser = null;
 
 if (!token || token === "undefined" || token === "null") {
     window.location.href = "login.html";
 }
+
+async function checkUserStatus() {
+    try {
+        const response = await fetch("https://ngaturin-kappa.vercel.app/api/me", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (response.ok) {
+            currentUser = await response.json();
+        }
+    } catch (err) {
+        console.error("Failed to fetch user:", err);
+    }
+}
+checkUserStatus();
 
 
 // ==========================
@@ -234,20 +251,9 @@ function logout() {
 // POCKET NOTES (WITH PREMIUM)
 // ==========================
 function handlePocketNotesClick() {
-
-    // get user (for testing premium)
-    let user = JSON.parse(sessionStorage.getItem("activeUser"));
-
-    // if no user → create dummy
-    if (!user) {
-        user = { isPremium: false };
-        sessionStorage.setItem("activeUser", JSON.stringify(user));
-    }
-
-    if (user.isPremium) {
+    if (currentUser && currentUser.is_premium) {
         window.location.href = "pocketnotes.html";
     } else {
-        // show modal
         document.getElementById('premiumModal').style.display = 'flex';
     }
 }
@@ -262,22 +268,58 @@ function closeModal() {
 
 
 // ==========================
-// UNLOCK PREMIUM (TEST MODE)
+// UNLOCK PREMIUM (MIDTRANS)
 // ==========================
-function unlockPremium() {
+async function unlockPremium() {
+    const btn = document.querySelector("#premiumModal .btn-primary");
+    const originalText = btn.innerText;
+    
+    try {
+        btn.innerText = "Processing...";
+        btn.disabled = true;
 
-    let user = JSON.parse(sessionStorage.getItem("activeUser")) || {};
-    user.isPremium = true;
+        const response = await fetch("https://ngaturin-kappa.vercel.app/api/payment/checkout", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
 
-    sessionStorage.setItem("activeUser", JSON.stringify(user));
+        const data = await response.json();
 
-    showToast('Premium Unlocked!', 'success');
+        if (!response.ok) {
+            throw new Error(data.detail || "Checkout failed");
+        }
 
-    closeModal();
+        // Trigger Midtrans Snap
+        window.snap.pay(data.token, {
+            onSuccess: function(result) {
+                showToast('Payment Successful! Welcome to Premium.', 'success');
+                checkUserStatus();
+                closeModal();
+                setTimeout(() => {
+                    window.location.href = "pocketnotes.html";
+                }, 2000);
+            },
+            onPending: function(result) {
+                showToast('Payment Pending: Please finish your payment.', 'info');
+                closeModal();
+            },
+            onError: function(result) {
+                showToast('Payment Failed!', 'error');
+            },
+            onClose: function() {
+                console.log('Customer closed the popup without finishing the payment');
+            }
+        });
 
-    setTimeout(() => {
-        window.location.href = "pocketnotes.html";
-    }, 800);
+    } catch (error) {
+        showToast(error.message, 'error');
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 }
 </script>
 </body>
