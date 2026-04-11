@@ -705,40 +705,129 @@ function showRecapModal() {
 
     let totalIn = 0;
     let totalOut = 0;
+    let totalCurrent = 0;
 
+    let walletRows = '';
+    let allTxns = [];
+
+    // Calculate Wallet Balances & aggregate transactions
     pockets.forEach(p => {
-        (p.transactions || []).forEach(tx => {
-            if (tx.type === 'in') totalIn += tx.amount;
-            else if (tx.type === 'out') totalOut += tx.amount;
-        });
+        totalCurrent += p.current;
+        walletRows += `
+            <tr>
+                <td style="padding: 10px; text-align: left; border: 1px solid #e2e8f0; color: #334155;">
+                    <i class="bi ${p.icon}" style="margin-right: 8px; color: #64748b;"></i> ${p.name}
+                </td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">
+                    ${formatIDR(p.current)}
+                </td>
+            </tr>
+        `;
+
+        // Collate transactions
+        if (p.transactions) {
+            p.transactions.forEach(tx => {
+                allTxns.push({ ...tx, pocket_name: p.name });
+                if (tx.type === 'in') totalIn += tx.amount;
+                else if (tx.type === 'out') totalOut += Math.abs(tx.amount);
+            });
+        }
     });
 
     const net = totalIn - totalOut;
     const month = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const printedDate = new Date().toLocaleString();
+
+    // Sort transactions by date (Desc)
+    allTxns.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    let transactionRows = '';
+    if (allTxns.length === 0) {
+        transactionRows = `<tr><td colspan="4" style="padding: 20px; text-align: center; border: 1px solid #e2e8f0; color: #94a3b8;">No transactions found for this period.</td></tr>`;
+    } else {
+        transactionRows = allTxns.map(tx => {
+            const txDate = new Date(tx.created_at || new Date()).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+            const isInc = tx.type === 'in';
+            return `
+                <tr>
+                    <td style="padding: 10px; text-align: left; border: 1px solid #e2e8f0; color: #475569; font-size: 11px;">${txDate}</td>
+                    <td style="padding: 10px; text-align: left; border: 1px solid #e2e8f0; color: #334155;">${tx.pocket_name}</td>
+                    <td style="padding: 10px; text-align: left; border: 1px solid #e2e8f0; color: #334155;">${tx.note || (isInc ? 'Income' : 'Expense')}</td>
+                    <td style="padding: 10px; text-align: right; border: 1px solid #e2e8f0; color: ${isInc ? '#16a34a' : '#dc2626'}; font-weight: 600;">
+                        ${isInc ? '+' : '-'}${formatIDR(tx.amount)}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
 
     content.innerHTML = `
-        <div style="font-size: 2.5rem; margin-bottom: 10px;"><i class="bi bi-bar-chart-line-fill"></i></div>
-        <h2 style="font-size: 1.4rem; margin-bottom: 4px;">Monthly Recap</h2>
-        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 24px;">${month}</p>
-
-        <div style="display: flex; justify-content: space-around; margin-bottom: 20px;">
-            <div>
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">INCOME</div>
-                <div style="font-size: 1.2rem; font-weight: 700; color: #4ade80;">${formatIDR(totalIn)}</div>
+        <div style="font-family: 'Inter', sans-serif; width: 100%;">
+            <!-- HEADER -->
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;">
+                <h1 style="font-size: 28px; color: #0f172a; margin: 0; font-weight: 800; letter-spacing: -0.5px;">Ngaturin</h1>
+                <h2 style="font-size: 14px; color: #64748b; margin: 5px 0 0; letter-spacing: 2px;">ACCOUNT STATEMENT</h2>
+                <p style="font-size: 13px; color: #94a3b8; margin: 8px 0 0;">Statement Period: <strong>${month}</strong></p>
             </div>
-            <div>
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">EXPENSE</div>
-                <div style="font-size: 1.2rem; font-weight: 700; color: #f87171;">${formatIDR(totalOut)}</div>
+
+            <!-- SUMMARY SECTION -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 30px; padding: 25px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                <div style="text-align: center; flex: 1;">
+                    <p style="font-size: 11px; color: #64748b; margin: 0 0 5px; font-weight: 600; letter-spacing: 1px;">TOTAL INCOME</p>
+                    <p style="font-size: 20px; font-weight: 700; color: #16a34a; margin: 0;">${formatIDR(totalIn)}</p>
+                </div>
+                <div style="text-align: center; flex: 1; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; padding: 0 20px;">
+                    <p style="font-size: 11px; color: #64748b; margin: 0 0 5px; font-weight: 600; letter-spacing: 1px;">TOTAL EXPENSE</p>
+                    <p style="font-size: 20px; font-weight: 700; color: #dc2626; margin: 0;">${formatIDR(totalOut)}</p>
+                </div>
+                <div style="text-align: center; flex: 1;">
+                    <p style="font-size: 11px; color: #64748b; margin: 0 0 5px; font-weight: 600; letter-spacing: 1px;">NET CASH FLOW</p>
+                    <p style="font-size: 20px; font-weight: 700; color: ${net >= 0 ? '#16a34a' : '#dc2626'}; margin: 0;">${formatIDR(net)}</p>
+                </div>
             </div>
-        </div>
 
-        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
-            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">NET BALANCE</div>
-            <div style="font-size: 1.6rem; font-weight: 800; color: ${net >= 0 ? '#4ade80' : '#f87171'};">${formatIDR(net)}</div>
-        </div>
+            <!-- WALLET SUMMARY -->
+            <h3 style="font-size: 14px; color: #0f172a; margin-bottom: 12px; font-weight: 700; text-transform: uppercase;">Wallet Balances</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 13px;">
+                <thead>
+                    <tr style="background: #f1f5f9; color: #475569;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600;">Fund Source / Wallet</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #e2e8f0; font-weight: 600;">Ending Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${walletRows || `<tr><td colspan="2" style="padding: 10px; border: 1px solid #e2e8f0; color:#94a3b8; text-align:center;">No active wallets</td></tr>`}
+                </tbody>
+                <tfoot>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 12px; text-align: left; border: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">Total Available Assets</td>
+                        <td style="padding: 12px; text-align: right; border: 1px solid #e2e8f0; font-weight: 800; color: #2563eb; font-size: 15px;">${formatIDR(totalCurrent)}</td>
+                    </tr>
+                </tfoot>
+            </table>
 
-        <div style="margin-top: 20px; font-size: 0.8rem; color: rgba(255,255,255,0.4);">
-            ${pockets.length} active pocket${pockets.length !== 1 ? 's' : ''}
+            <!-- TRANSACTIONS LEDGER -->
+            <h3 style="font-size: 14px; color: #0f172a; margin-bottom: 12px; font-weight: 700; text-transform: uppercase;">Transaction Ledger</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <thead>
+                    <tr style="background: #f1f5f9; color: #475569;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600;">Date</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600;">Wallet</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600;">Description</th>
+                        <th style="padding: 12px; text-align: right; border: 1px solid #e2e8f0; font-weight: 600;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${transactionRows}
+                </tbody>
+            </table>
+
+            <!-- FOOTER -->
+            <div style="margin-top: 60px; padding-top: 20px; border-top: 1px dashed #cbd5e1; text-align: center; font-size: 10px; color: #94a3b8;">
+                <p style="margin: 0 0 4px;">This statement is generated automatically by Ngaturin App and serves as a digital record of reported transactions.</p>
+                <p style="margin: 0;">Printed on: ${printedDate}</p>
+            </div>
         </div>
     `;
 
@@ -750,7 +839,24 @@ function closeRecapModal() {
 }
 
 function downloadPDF() {
-    showToastMsg("Screenshot feature coming soon!", "success");
+    const element = document.getElementById('wrappedContent');
+    const month = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    // Temporarily adjust styles for pure PDF layout if necessary
+    const opt = {
+        margin:       [0.4, 0.4, 0.4, 0.4],
+        filename:     `Ngaturin-Account-Statement-${month}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        showToastMsg("PDF Generated Successfully", "success");
+    }).catch(err => {
+        console.error(err);
+        showToastMsg("Failed to generate PDF", "error");
+    });
 }
 
 
