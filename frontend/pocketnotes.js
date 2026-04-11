@@ -24,14 +24,6 @@ var editingPocketId = null; // for edit/delete mode
 // 🌐 API — LOAD TRANSACTIONS
 // ==============================
 async function loadTransactionsForPocket(pocketId) {
-    if (getToken() === "guest-token") {
-        // Return dummy transactions based on pocket for guest mode
-        return [
-            { id: "tx1", pocket_id: pocketId, amount: 500000, type: "in", note: "Initial Savings", created_at: new Date().toISOString() },
-            { id: "tx2", pocket_id: pocketId, amount: 150000, type: "out", note: "Snacks", created_at: new Date().toISOString() }
-        ];
-    }
-
     try {
         const res = await fetch(`${API_BASE}/pockets/${pocketId}/transactions`, {
             headers: {
@@ -50,21 +42,6 @@ async function loadTransactionsForPocket(pocketId) {
 // 🌐 API — LOAD POCKETS
 // ==============================
 async function loadPockets() {
-    if (getToken() === "guest-token") {
-        // Guest mode dummy data
-        if (pockets.length === 0) {
-            pockets = [
-                { id: "g1", name: "Vacation Fund", icon: "bi-airplane-fill", color: "#6C63FF", current: 350000, target: 5000000 },
-                { id: "g2", name: "Emergency", icon: "bi-safe-fill", color: "#6C63FF", current: 1000000, target: 10000000 }
-            ];
-            for (let p of pockets) {
-                p.transactions = await loadTransactionsForPocket(p.id);
-            }
-        }
-        renderPockets();
-        return;
-    }
-
     try {
         const res = await fetch(`${API_BASE}/pockets`, {
             headers: {
@@ -87,6 +64,25 @@ async function loadPockets() {
     }
 }
 
+async function checkUserPremium() {
+    try {
+        const res = await fetch(`${API_BASE}/me`, {
+            headers: { Authorization: "Bearer " + getToken() }
+        });
+        if (res.ok) {
+            const user = await res.json();
+            if (!user.is_premium) {
+                alert("This is a premium feature. Please unlock it first.");
+                window.location.href = "selection.html";
+            }
+        } else {
+            window.location.href = "login.html";
+        }
+    } catch (e) {
+        window.location.href = "login.html";
+    }
+}
+
 
 // ==============================
 // 🚀 PAGE INIT
@@ -97,6 +93,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         window.location.href = "login.html";
         return;
     }
+
+    await checkUserPremium(); 
+
 
     await loadPockets();
     renderPocketSelector();
