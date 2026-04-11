@@ -91,6 +91,39 @@
             top: var(--spacing-xl);
             right: var(--spacing-xl);
         }
+
+        /* Responsive Fixes */
+        @media (max-width: 992px) {
+            .selection-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-xl);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .selection-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+            .selection-card img {
+                height: 140px;
+            }
+            .logo-top {
+                position: static;
+                justify-content: center;
+                margin-bottom: var(--spacing-xl);
+            }
+            .logout-btn {
+                top: 20px;
+                right: 20px;
+            }
+            .selection-page {
+                padding-top: 40px;
+            }
+            .selection-header h1 {
+                font-size: 1.8rem;
+            }
+        }
     </style>
 </head>
 

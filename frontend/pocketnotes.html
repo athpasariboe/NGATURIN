@@ -402,6 +402,59 @@
         .toast.error {
             background: #dc2626;
         }
+
+        /* Responsive Fixes untuk Mobile & Tablet */
+        @media (max-width: 1024px) {
+            .pocket-container {
+                grid-template-columns: 1fr; /* Pindah History Transaksi ke bawah */
+                padding: 16px;
+            }
+            .pocket-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0 16px;
+            }
+            .pocket-stats-bar {
+                flex-direction: column;
+                margin: 0 16px 20px 16px;
+                padding: 16px;
+            }
+            .global-history {
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .wallet-grid {
+                grid-template-columns: 1fr; /* Dompet 1 kolom di HP kecil */
+            }
+            .pocket-header h1 {
+                font-size: 1.6rem !important;
+            }
+            .pocket-header button {
+                width: 100%;
+                justify-content: center;
+            }
+            .pocket-header > div:last-child {
+                width: 100%;
+                flex-direction: column;
+            }
+            .stat-box {
+                text-align: center;
+            }
+            .stat-box .amount {
+                font-size: 1.4rem;
+            }
+            .modal-card {
+                padding: 20px !important;
+            }
+            #recapModal > div { /* Untuk "kertas A4" recap modal */
+                padding: 20px 15px !important;
+            }
+            #recapModal h1 {
+                font-size: 20px !important;
+            }
+        }
     </style>
 </head>
 
