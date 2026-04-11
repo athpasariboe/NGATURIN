@@ -29,11 +29,17 @@ MIDTRANS_SERVER_KEY = os.getenv("MIDTRANS_SERVER_KEY")
 MIDTRANS_CLIENT_KEY = os.getenv("MIDTRANS_CLIENT_KEY")
 MIDTRANS_IS_PRODUCTION = os.getenv("MIDTRANS_IS_PRODUCTION", "False").lower() == "true"
 
-snap = midtransclient.Snap(
-    is_production=MIDTRANS_IS_PRODUCTION,
-    server_key=MIDTRANS_SERVER_KEY,
-    client_key=MIDTRANS_CLIENT_KEY
-)
+# Initialize Snap only if keys are present to avoid startup crashes
+snap = None
+if MIDTRANS_SERVER_KEY and MIDTRANS_CLIENT_KEY:
+    try:
+        snap = midtransclient.Snap(
+            is_production=MIDTRANS_IS_PRODUCTION,
+            server_key=MIDTRANS_SERVER_KEY,
+            client_key=MIDTRANS_CLIENT_KEY
+        )
+    except Exception as e:
+        print(f"Midtrans Init Error: {e}")
 
 
 
@@ -534,6 +540,9 @@ def create_checkout(current_user: User = Depends(get_current_user), db: Session 
         }
     }
     
+    if not snap:
+        raise HTTPException(status_code=500, detail="Midtrans is not configured on the server.")
+
     try:
         transaction = snap.create_transaction(param)
         return {"token": transaction["token"]}
