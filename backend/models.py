@@ -97,3 +97,16 @@ class Transaction(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     pocket = relationship("Pocket", back_populates="transactions")
+
+# ORDER MODEL (MIDTRANS)
+
+class Order(Base):
+    __tablename__ = "orders"
+
+    order_id = Column(String, primary_key=True) # Ex: "trx-user-uuid"
+    amount = Column(Integer)
+    status = Column(String, default="pending") # pending, settlement, expire
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    user = relationship("User", back_populates="orders")
