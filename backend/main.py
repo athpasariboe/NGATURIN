@@ -12,6 +12,7 @@ from models import User, Goal, Savings, Pocket, Transaction
 from auth import hash_password, verify_password, create_access_token
 from uuid import UUID
 from typing import Literal
+from datetime import datetime
 
 import os
 
@@ -276,6 +277,13 @@ def delete_goal(
 class PocketCreate(BaseModel):
     name: str
     icon: str | None = None
+    target: float | None = 1000000
+
+class PocketUpdate(BaseModel):
+    name: str | None = None
+    icon: str | None = None
+    color: str | None = None
+    target: float | None = None
 
 # GET USER POCKETS
 # Returns all pockets that belong to the currently logged-in user
@@ -307,7 +315,7 @@ def create_pocket(
         icon=data.icon,
         color="#6C63FF",  # default color
         current=0,
-        target=1000000,   # default target
+        target=data.target or 1000000,
         user_id=current_user.id
     )
 
@@ -316,6 +324,39 @@ def create_pocket(
     db.refresh(new_pocket)
 
     return new_pocket
+
+# UPDATE POCKET
+# This endpoint updates pocket details (name, icon, target, color)
+
+@app.put("/api/pockets/{pocket_id}")
+def update_pocket(
+    pocket_id: UUID,
+    data: PocketUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    pocket = db.query(Pocket).filter(
+        Pocket.id == pocket_id,
+        Pocket.user_id == current_user.id
+    ).first()
+
+    if not pocket:
+        raise HTTPException(status_code=404, detail="Pocket not found")
+
+    if data.name is not None:
+        pocket.name = data.name
+    if data.icon is not None:
+        pocket.icon = data.icon
+    if data.color is not None:
+        pocket.color = data.color
+    if data.target is not None:
+        pocket.target = data.target
+
+    db.commit()
+    db.refresh(pocket)
+
+    return pocket
 
 # DELETE POCKET
 # This endpoint deletes a pocket based on pocket ID
@@ -349,6 +390,7 @@ class TransactionCreate(BaseModel):
     amount: float
     type: Literal["in", "out"]   # "in" (income) or "out" (expense)
     note: str | None = None
+    created_at: datetime | None = None
 
 # CREATE TRANSACTION
 # This endpoint records a transaction and updates pocket balance
@@ -387,7 +429,8 @@ def create_transaction(
         user_id=current_user.id,
         amount=data.amount,
         type=data.type,
-        note=data.note
+        note=data.note,
+        created_at=data.created_at or datetime.utcnow()
     )
 
     db.add(new_tx)

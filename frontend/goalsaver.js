@@ -5,7 +5,7 @@
 let userGoals = [];
 let activeGoalId = null;
 
-const API_URL = "https://ngaturin-kappa.vercel.app/api/login";
+const API_URL = "https://ngaturin-kappa.vercel.app/api";
 
 
 // ========================================
@@ -74,18 +74,18 @@ function calculateSavings() {
 
     let html = "";
 
-    html += `📅 Save Rp ${formatNumber(daily)} per day<br>`;
+    html += `<i class="bi bi-calendar3"></i> Save Rp ${formatNumber(daily)} per day<br>`;
 
     if (daysRemaining > 7) {
-        html += `📅 Save Rp ${formatNumber(weekly)} per week<br>`;
+        html += `<i class="bi bi-calendar-week"></i> Save Rp ${formatNumber(weekly)} per week<br>`;
     }
 
     if (daysRemaining > 30) {
-        html += `📅 Save Rp ${formatNumber(monthly)} per month`;
+        html += `<i class="bi bi-calendar-month"></i> Save Rp ${formatNumber(monthly)} per month`;
     }
 
     document.getElementById("calculationDisplay").innerHTML =
-        `<h4 style="color: var(--color-primary); margin-bottom:8px;">💡 Your Recommended Savings Plan</h4>${html}`;
+        `<h4 style="color: var(--color-primary); margin-bottom:8px;"><i class="bi bi-lightbulb-fill"></i> Your Recommended Savings Plan</h4>${html}`;
 
     document.getElementById("calculationDisplay").classList.add("active");
 }
@@ -216,7 +216,7 @@ function renderGoals(){
 <h4>${goal.title}</h4>
 
 <div class="goal-meta">
-🎯 Rp ${formatNumber(goal.target_amount)}
+<i class="bi bi-bullseye"></i> Rp ${formatNumber(goal.target_amount)}
 </div>
 
 <div class="progress-bar">
@@ -233,7 +233,7 @@ ${Math.round(progress)}%
 <p>Saved: Rp ${formatNumber(saved)}</p>
 ${progress >= 100 ? `
 <div class="goal-complete">
-    🎉 Goal Completed!
+    <i class="bi bi-check-circle-fill"></i> Goal Completed!
 </div>
 ` : ""}
 
@@ -253,17 +253,17 @@ Loading history...
 ${progress < 100 ? `
 <button class="btn btn-primary btn-small"
 onclick="openSavingsModal('${goal.id}')">
-💰 Add Savings
+<i class="bi bi-plus-lg"></i> Add Savings
 </button>
 ` : `
 <button class="btn btn-primary btn-small" disabled>
-✔ Completed
+<i class="bi bi-check-lg"></i> Completed
 </button>
 `}
 
 <button class="btn btn-secondary btn-small"
 onclick="openDeleteModal('${goal.id}')">
-🗑 Delete
+<i class="bi bi-trash3"></i> Delete
 </button>
 
 </div>
@@ -563,7 +563,7 @@ savings.forEach(s => {
 
     const item = `
         <div class="saving-item">
-            💰 + Rp ${formatNumber(s.amount)}
+            <i class="bi bi-plus-circle-fill" style="color:#2e7d32;"></i> + Rp ${formatNumber(s.amount)}
             <span class="saving-date">${formattedTime}</span>
         </div>
     `;

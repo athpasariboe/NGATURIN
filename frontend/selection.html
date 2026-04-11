@@ -12,6 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .selection-page {
             min-height: 100vh;
@@ -130,7 +131,7 @@
                     onclick="handlePocketNotesClick()">
                     <div
                         style="position: absolute; top: -15px; right: -15px; background: gold; color: #5a4a00; padding: 5px 15px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transform: rotate(15deg); z-index: 1;">
-                        PREMIUM 👑
+                        PREMIUM <i class="bi bi-gem"></i>
                     </div>
                     <img src="assets/money in pocket .jpeg" alt="Pocket Notes">
                     <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-md);">
@@ -151,7 +152,7 @@
             style="background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 500px; position: relative;">
             <button onclick="closeModal()"
                 style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
-            <div style="font-size: 60px; margin-bottom: 20px;">👑</div>
+            <div style="font-size: 60px; margin-bottom: 20px;"><i class="bi bi-gem" style="color: gold;"></i></div>
             <h2 style="color: var(--color-primary);">Unlock Pocket Notes</h2>
             <p style="color: var(--color-text-light); margin-bottom: 30px;">
                 Upgrade to Premium to access Digital Jars, Unlimited Pockets, and Advanced Budgeting tools!
@@ -226,7 +227,7 @@ function unlockPremium() {
 
     sessionStorage.setItem("activeUser", JSON.stringify(user));
 
-    showToast('Premium Unlocked! 👑', 'success');
+    showToast('Premium Unlocked!', 'success');
 
     closeModal();
 
