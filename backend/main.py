@@ -556,3 +556,20 @@ def force_unlock(order_id: str, db: Session = Depends(get_db)):
         return {"status": "success", "message": f"Premium successfully forced for {user.email}. You can now test the Open Pockets button!"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==========================
+# HARDCODED TEST ENDPOINT
+# ==========================
+
+@app.get("/api/check-me")
+def check_me_hardcode(db: Session = Depends(get_db)):
+    try:
+        user = db.query(User).filter(User.email.ilike("darmawijayaamanda%")).first()
+        if not user:
+            return {"status": "error", "message": "User darmawijayaamanda not found!"}
+            
+        user.is_premium = True
+        db.commit()
+        return {"status": "success", "message": "User darmawijayaamanda force unlocked successfully! Please check Pocket Notes now."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
