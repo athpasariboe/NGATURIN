@@ -505,6 +505,13 @@ async def payment_handler(request: Request, db: Session = Depends(get_db)):
         order_id = payload.get("order_id")
         transaction_status = payload.get("transaction_status")
         
+        # Log to Server Console
+        print("\n" + "="*30)
+        print(f"⚡ MIDTRANS WEBHOOK ARRIVED ⚡")
+        print(f"Order ID       : {order_id}")
+        print(f"Payment Status : {transaction_status}")
+        print("="*30 + "\n")
+        
         # Guard clause
         if not order_id or not transaction_status:
             raise HTTPException(status_code=400, detail="Invalid payload from payment gateway")
@@ -514,14 +521,17 @@ async def payment_handler(request: Request, db: Session = Depends(get_db)):
         user = db.query(User).filter(User.email.ilike(f"{order_id}@%")).first()
         
         if not user:
+            print(f"❌ User NOT FOUND for username: {order_id}")
             return {"status": "ignored", "message": f"User not found for username/order_id: {order_id}"}
         
         # If successfully paid (settlement)
         if transaction_status in ["settlement", "capture"]:
             user.is_premium = True
             db.commit()
+            print(f"✅ UNLOCKED PREMIUM for {user.email}")
             return {"status": "success", "message": f"Premium activated for user {user.email}"}
                 
+        print(f"⏳ Status is {transaction_status}, waiting for settlement")
         return {"status": "success", "message": f"Notification received for {user.email}, but not a settlement"}
         
     except Exception as e:
