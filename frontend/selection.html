@@ -313,7 +313,7 @@ Tujuan: Unlock Fitur Premium Pocket Notes
 
 Mohon instruksi selanjutnya untuk proses pembayarannya. Terima kasih!`;
 
-    const waUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
+    const waUrl = `https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(message)}`;
 
     // 3. Redirect to WhatsApp
     window.open(waUrl, '_blank');
