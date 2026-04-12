@@ -251,22 +251,28 @@ function logout() {
 // POCKET NOTES (WITH PREMIUM)
 // ==========================
 function handlePocketNotesClick() {
-
-    // get user (for testing premium)
-    let user = JSON.parse(sessionStorage.getItem("activeUser"));
-
-    // if no user → create dummy
-    if (!user) {
-        user = { isPremium: false };
-        sessionStorage.setItem("activeUser", JSON.stringify(user));
+    const token = localStorage.getItem("token");
+    if (!token) {
+        window.location.href = "login.html";
+        return;
     }
 
-    if (user.isPremium) {
-        window.location.href = "pocketnotes.html";
-    } else {
-        // show modal
-        document.getElementById('premiumModal').style.display = 'flex';
-    }
+    fetch("https://ngaturin-kappa.vercel.app/api/me", {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(response => response.json())
+    .then(user => {
+        if (user.is_premium) {
+            window.location.href = "pocketnotes.html";
+        } else {
+            // show modal
+            document.getElementById('premiumModal').style.display = 'flex';
+        }
+    })
+    .catch(err => {
+        console.error("Failed to fetch user status", err);
+        showToast("Error connecting to server", "error");
+    });
 }
 
 
@@ -318,20 +324,17 @@ Please provide the next steps for the payment process. Thank you!`;
     // 3. Redirect to WhatsApp
     window.open(waUrl, '_blank');
 
-    // For demo purposes: temporarily unlock premium locally so the user can test the page
-    let user = JSON.parse(sessionStorage.getItem("activeUser")) || {};
-    user.isPremium = true;
-    sessionStorage.setItem("activeUser", JSON.stringify(user));
-
-    showToast('Redirected to WhatsApp. Awaiting Admin Approval.', 'success');
+    showToast('Redirected to WhatsApp. Please complete the payment to proceed.', 'success');
 
     setTimeout(() => {
         closeModal();
         btn.innerHTML = 'Proceed to Payment (Rp 25.000)';
         btn.disabled = false;
         
-        // Let them explore after 1.5s
-        window.location.href = "pocketnotes.html";
+        // Reset form for next time
+        document.getElementById('premiumName').value = '';
+        document.getElementById('premiumEmail').value = '';
+        document.getElementById('premiumPhone').value = '';
     }, 1500);
 }
 </script>

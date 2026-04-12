@@ -98,6 +98,27 @@ document.addEventListener('DOMContentLoaded', async function () {
         return;
     }
 
+    try {
+        const res = await fetch("https://ngaturin-kappa.vercel.app/api/me", {
+            headers: { Authorization: "Bearer " + getToken() }
+        });
+        if (res.ok) {
+            const user = await res.json();
+            if (!user.is_premium) {
+                alert("This is a Premium feature. Please unlock it from the home page.");
+                window.location.href = "selection.html";
+                return;
+            }
+        } else {
+            window.location.href = "login.html";
+            return;
+        }
+    } catch (e) {
+        console.error("Premium check error:", e);
+        window.location.href = "login.html";
+        return;
+    }
+
     await loadPockets();
     renderPocketSelector();
     updateStats();
