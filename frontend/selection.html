@@ -310,12 +310,13 @@ function unlockPremium() {
 
     // 2. Format WhatsApp Message
     const adminPhone = "6282118313761";
+    const orderId = email.split('@')[0]; // Extract username without domain
     const message = `Hello Admin Ngaturin, I would like to make a payment to unlock the Premium Pocket Notes feature. Here are my details:
 
 Name: ${name}
 Email: ${email}
 Phone Number: ${phone}
-Purpose: Unlock Premium Pocket Notes Feature
+Order ID: ${orderId}
 
 Please provide the next steps for the payment process. Thank you!`;
 
