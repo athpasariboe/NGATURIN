@@ -499,26 +499,20 @@ async def payment_handler(request: Request, db: Session = Depends(get_db)):
         if not order_id or not transaction_status:
             raise HTTPException(status_code=400, detail="Invalid payload from payment gateway")
             
-        # Find the order
-        order = db.query(Order).filter(Order.order_id == order_id).first()
+        # Determine the user based on the order_id (which acts as the username / prefix of email)
+        # e.g., order_id = "darmawijayaamanda" -> matches "darmawijayaamanda@gmail.com"
+        user = db.query(User).filter(User.email.ilike(f"{order_id}%")).first()
         
-        if not order:
-            # Order not found in database, ignoring notification
-            return {"status": "ignored", "message": "Order ID not found"}
-            
-        # Update order status
-        order.status = transaction_status
-        db.commit()
+        if not user:
+            return {"status": "ignored", "message": f"User not found for username/order_id: {order_id}"}
         
         # If successfully paid (settlement)
         if transaction_status in ["settlement", "capture"]:
-            user = db.query(User).filter(User.id == order.user_id).first()
-            if user:
-                user.is_premium = True
-                db.commit()
-                return {"status": "success", "message": "Premium activated"}
+            user.is_premium = True
+            db.commit()
+            return {"status": "success", "message": f"Premium activated for user {user.email}"}
                 
-        return {"status": "success", "message": "Order updated"}
+        return {"status": "success", "message": f"Notification received for {user.email}, but not a settlement"}
         
     except Exception as e:
         import traceback
