@@ -165,6 +165,16 @@ def login(
         "token_type": "bearer"
     }
 
+# GET CURRENT USER PROFILE
+
+@app.get("/api/me")
+def get_user_profile(current_user: User = Depends(get_current_user)):
+    return {
+        "id": str(current_user.id),
+        "email": current_user.email,
+        "is_premium": current_user.is_premium
+    }
+
 
 
 # CREATE GOAL
