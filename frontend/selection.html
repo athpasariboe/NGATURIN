@@ -193,16 +193,33 @@
     <div id="premiumModal" class="modal-overlay"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
         <div class="modal-card"
-            style="background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 500px; position: relative;">
+            style="background: white; padding: 40px; border-radius: 20px; text-align: left; max-width: 450px; width: 90%; position: relative;">
             <button onclick="closeModal()"
                 style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
-            <div style="font-size: 60px; margin-bottom: 20px;"><i class="bi bi-gem" style="color: gold;"></i></div>
-            <h2 style="color: var(--color-primary);">Unlock Pocket Notes</h2>
-            <p style="color: var(--color-text-light); margin-bottom: 30px;">
-                Upgrade to Premium to access Digital Jars, Unlimited Pockets, and Advanced Budgeting tools!
+            
+            <div style="text-align: center; font-size: 50px; margin-bottom: 10px;"><i class="bi bi-gem" style="color: gold;"></i></div>
+            <h2 style="color: var(--color-primary); text-align: center; margin-bottom: 10px;">Get Premium</h2>
+            <p style="color: var(--color-text-light); text-align: center; margin-bottom: 25px; font-size: 14px;">
+                Complete your details to unlock Digital Jars & Advanced Budgeting!
             </p>
-            <button class="btn btn-primary btn-large" onclick="unlockPremium()"
-                style="width: 100%; background: gold; color: #5a4a00;">Get Premium Now</button>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 500; margin-bottom: 5px; color: var(--color-text);">Full Name</label>
+                <input type="text" id="premiumName" placeholder="e.g. John Doe" style="width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 500; margin-bottom: 5px; color: var(--color-text);">Email Address</label>
+                <input type="email" id="premiumEmail" placeholder="john@example.com" style="width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: 500; margin-bottom: 5px; color: var(--color-text);">Phone Number</label>
+                <input type="tel" id="premiumPhone" placeholder="0812xxxxxx" style="width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px;">
+            </div>
+
+            <button id="premiumBtn" class="btn btn-primary btn-large" onclick="unlockPremium()"
+                style="width: 100%; background: gold; color: #5a4a00; font-weight: 600; font-size: 16px;">
+                Proceed to Payment (Rp 50.000)
+            </button>
         </div>
     </div>
 
@@ -265,19 +282,58 @@ function closeModal() {
 // UNLOCK PREMIUM (TEST MODE)
 // ==========================
 function unlockPremium() {
+    // 1. Validate Form
+    const name = document.getElementById('premiumName').value.trim();
+    const email = document.getElementById('premiumEmail').value.trim();
+    const phone = document.getElementById('premiumPhone').value.trim();
 
-    let user = JSON.parse(sessionStorage.getItem("activeUser")) || {};
-    user.isPremium = true;
+    if (!name || !email || !phone) {
+        showToast('Please fill in all details first!', 'error');
+        return;
+    }
 
-    sessionStorage.setItem("activeUser", JSON.stringify(user));
+    // Basic email validation
+    if (!email.includes('@') || !email.includes('.')) {
+        showToast('Please enter a valid email address.', 'error');
+        return;
+    }
 
-    showToast('Premium Unlocked!', 'success');
-
-    closeModal();
+    // 2. Simulate Payment Processing
+    const btn = document.getElementById('premiumBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing Payment...';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
 
     setTimeout(() => {
-        window.location.href = "pocketnotes.html";
-    }, 800);
+        // 3. Complete Payment Simulation
+        let user = JSON.parse(sessionStorage.getItem("activeUser")) || {};
+        user.isPremium = true;
+
+        sessionStorage.setItem("activeUser", JSON.stringify(user));
+
+        btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Payment Successful!';
+        btn.style.background = 'var(--color-primary)';
+        btn.style.color = 'white';
+        
+        showToast(`Thank you ${name}! Premium Unlocked.`, 'success');
+
+        setTimeout(() => {
+            closeModal();
+            // Reset button and form for next time
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.background = 'gold';
+            btn.style.color = '#5a4a00';
+            document.getElementById('premiumName').value = '';
+            document.getElementById('premiumEmail').value = '';
+            document.getElementById('premiumPhone').value = '';
+            
+            window.location.href = "pocketnotes.html";
+        }, 1500);
+
+    }, 2000); // simulate 2s loading
 }
 </script>
 </body>
