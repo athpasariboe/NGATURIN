@@ -260,9 +260,14 @@ function handlePocketNotesClick() {
     fetch("https://ngaturin-kappa.vercel.app/api/me", {
         headers: { "Authorization": "Bearer " + token }
     })
-    .then(response => response.json())
-    .then(user => {
-        if (user.is_premium) {
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+            alert("Sistem Backend Error! Mohon kirimkan foto error ini ke saya: " + JSON.stringify(data));
+            return;
+        }
+        
+        if (data.is_premium) {
             window.location.href = "pocketnotes.html";
         } else {
             // show modal
