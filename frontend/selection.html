@@ -304,14 +304,14 @@ function unlockPremium() {
 
     // 2. Format WhatsApp Message
     const adminPhone = "6282118313761";
-    const message = `Halo Admin Ngaturin, saya ingin melakukan pembayaran untuk unlock fitur Premium Pocket Notes. Berikut data diri saya:
+    const message = `Hello Admin Ngaturin, I would like to make a payment to unlock the Premium Pocket Notes feature. Here are my details:
 
-Nama: ${name}
+Name: ${name}
 Email: ${email}
-No. HP: ${phone}
-Tujuan: Unlock Fitur Premium Pocket Notes
+Phone Number: ${phone}
+Purpose: Unlock Premium Pocket Notes Feature
 
-Mohon instruksi selanjutnya untuk proses pembayarannya. Terima kasih!`;
+Please provide the next steps for the payment process. Thank you!`;
 
     const waUrl = `https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(message)}`;
 
