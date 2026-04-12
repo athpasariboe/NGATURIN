@@ -298,42 +298,41 @@ function unlockPremium() {
         return;
     }
 
-    // 2. Simulate Payment Processing
     const btn = document.getElementById('premiumBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing Payment...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Redirecting...';
     btn.disabled = true;
-    btn.style.opacity = '0.7';
+
+    // 2. Format WhatsApp Message
+    const adminPhone = "6282118313761";
+    const message = `Halo Admin Ngaturin, saya ingin melakukan pembayaran untuk unlock fitur Premium Pocket Notes. Berikut data diri saya:
+
+Nama: ${name}
+Email: ${email}
+No. HP: ${phone}
+Tujuan: Unlock Fitur Premium Pocket Notes
+
+Mohon instruksi selanjutnya untuk proses pembayarannya. Terima kasih!`;
+
+    const waUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
+
+    // 3. Redirect to WhatsApp
+    window.open(waUrl, '_blank');
+
+    // For demo purposes: temporarily unlock premium locally so the user can test the page
+    let user = JSON.parse(sessionStorage.getItem("activeUser")) || {};
+    user.isPremium = true;
+    sessionStorage.setItem("activeUser", JSON.stringify(user));
+
+    showToast('Redirected to WhatsApp. Awaiting Admin Approval.', 'success');
 
     setTimeout(() => {
-        // 3. Complete Payment Simulation
-        let user = JSON.parse(sessionStorage.getItem("activeUser")) || {};
-        user.isPremium = true;
-
-        sessionStorage.setItem("activeUser", JSON.stringify(user));
-
-        btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Payment Successful!';
-        btn.style.background = 'var(--color-primary)';
-        btn.style.color = 'white';
+        closeModal();
+        btn.innerHTML = 'Proceed to Payment (Rp 25.000)';
+        btn.disabled = false;
         
-        showToast(`Thank you ${name}! Premium Unlocked.`, 'success');
-
-        setTimeout(() => {
-            closeModal();
-            // Reset button and form for next time
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.style.background = 'gold';
-            btn.style.color = '#5a4a00';
-            document.getElementById('premiumName').value = '';
-            document.getElementById('premiumEmail').value = '';
-            document.getElementById('premiumPhone').value = '';
-            
-            window.location.href = "pocketnotes.html";
-        }, 1500);
-
-    }, 2000); // simulate 2s loading
+        // Let them explore after 1.5s
+        window.location.href = "pocketnotes.html";
+    }, 1500);
 }
 </script>
 </body>
