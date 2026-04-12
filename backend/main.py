@@ -8,13 +8,14 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
 from database import engine, Base, SessionLocal
-from models import User, Goal, Savings, Pocket, Transaction
+from models import User, Goal, Savings, Pocket, Transaction, Order
 from auth import hash_password, verify_password, create_access_token
 from uuid import UUID
 from typing import Literal
 from datetime import datetime
 
 import os
+from fastapi import Request
 
 
 
@@ -480,3 +481,46 @@ def get_goal_savings(
         .all()
 
     return savings
+
+# ==========================
+# MIDTRANS WEBHOOK HANDLER
+# ==========================
+
+@app.post("/api/payment-handler")
+async def payment_handler(request: Request, db: Session = Depends(get_db)):
+    try:
+        # Get JSON from Midtrans
+        payload = await request.json()
+        
+        order_id = payload.get("order_id")
+        transaction_status = payload.get("transaction_status")
+        
+        # Guard clause
+        if not order_id or not transaction_status:
+            raise HTTPException(status_code=400, detail="Invalid payload from payment gateway")
+            
+        # Find the order
+        order = db.query(Order).filter(Order.order_id == order_id).first()
+        
+        if not order:
+            # Order not found in database, ignoring notification
+            return {"status": "ignored", "message": "Order ID not found"}
+            
+        # Update order status
+        order.status = transaction_status
+        db.commit()
+        
+        # If successfully paid (settlement)
+        if transaction_status in ["settlement", "capture"]:
+            user = db.query(User).filter(User.id == order.user_id).first()
+            if user:
+                user.is_premium = True
+                db.commit()
+                return {"status": "success", "message": "Premium activated"}
+                
+        return {"status": "success", "message": "Order updated"}
+        
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
