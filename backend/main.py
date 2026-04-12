@@ -516,11 +516,9 @@ async def payment_handler(request: Request, db: Session = Depends(get_db)):
         if not order_id or not transaction_status:
             raise HTTPException(status_code=400, detail="Invalid payload from payment gateway")
             
-        # Determine the user based on the order_id (using BOTH username column OR email prefix)
-        user = db.query(User).filter(
-            (User.username.ilike(order_id)) | 
-            (User.email.ilike(f"{order_id}@%"))
-        ).first()
+        # Determine the user based on the order_id (which acts as the username / prefix of email)
+        # e.g., order_id = "darmawijayaamanda" -> matches exactly "darmawijayaamanda@..."
+        user = db.query(User).filter(User.email.ilike(f"{order_id}@%")).first()
         
         if not user:
             print(f"❌ User NOT FOUND for username: {order_id}")
