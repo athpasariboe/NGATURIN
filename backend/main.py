@@ -528,3 +528,21 @@ async def payment_handler(request: Request, db: Session = Depends(get_db)):
         import traceback
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==========================
+# DIAGNOSTIC TOOL (FORCE UNLOCK)
+# ==========================
+
+@app.get("/api/force-unlock/{order_id}")
+def force_unlock(order_id: str, db: Session = Depends(get_db)):
+    try:
+        user = db.query(User).filter(User.email.ilike(f"{order_id}%")).first()
+        if not user:
+            raise HTTPException(status_code=404, detail=f"User not found for order_id: {order_id}")
+            
+        user.is_premium = True
+        db.commit()
+        
+        return {"status": "success", "message": f"Premium successfully forced for {user.email}. You can now test the Open Pockets button!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
