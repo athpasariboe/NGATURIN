@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,9 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .login-page {
@@ -24,17 +21,12 @@
             background-position: center;
             position: relative;
         }
-
         .login-page::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.3);
         }
-
         .login-container {
             position: relative;
             z-index: 1;
@@ -42,7 +34,6 @@
             align-items: center;
             gap: var(--spacing-3xl);
         }
-
         .login-card {
             background-color: var(--color-card);
             border-radius: var(--radius-xl);
@@ -51,13 +42,6 @@
             width: 100%;
             max-width: 400px;
         }
-
-        .login-welcome {
-            text-align: right;
-            color: white;
-            max-width: 400px;
-        }
-
         .logo-header {
             position: absolute;
             top: var(--spacing-xl);
@@ -69,14 +53,9 @@
             font-weight: 700;
             font-size: var(--font-size-xl);
         }
-
-        .logo-header img {
-            width: 48px;
-            height: 48px;
-        }
+        .logo-header img { width: 48px; height: 48px; }
     </style>
 </head>
-
 <body>
     <div class="login-page">
         <div class="logo-header">
@@ -95,94 +74,74 @@
                 <form id="loginForm">
                     <div class="form-group">
                         <label for="username" class="form-label">Email</label>
-                        <input type="text" id="username" name="username" class="form-input" placeholder="Email"
-                            required>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Email" required>
                     </div>
-
                     <div class="form-group">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" id="password" name="password" class="form-input" placeholder="Password"
-                            required>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Password" required>
                     </div>
-
-                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="form-group" style="display:flex;justify-content:space-between;align-items:center;">
                         <div class="form-checkbox">
                             <input type="checkbox" id="remember" name="remember">
                             <label for="remember">Remember me</label>
                         </div>
-                        <a href="#" style="color: var(--color-text-light); font-size: var(--font-size-sm);">
-                            Forgot Password?
-                        </a>
+                        <a href="#" style="color:var(--color-text-light);font-size:var(--font-size-sm);">Forgot Password?</a>
                     </div>
-
-                    <button type="submit" class="btn btn-primary w-full btn-large mt-md">
-                        Sign In
-                    </button>
+                    <button type="submit" class="btn btn-primary w-full btn-large mt-md">Sign In</button>
                 </form>
 
-                <p class="text-center mt-lg" style="color: var(--color-text-light); font-size: var(--font-size-sm);">
+                <p class="text-center mt-lg" style="color:var(--color-text-light);font-size:var(--font-size-sm);">
                     Don't have an account?
-                    <a href="register.html" style="color: var(--color-primary); font-weight: 600;">Create Account</a>
+                    <a href="register.html" style="color:var(--color-primary);font-weight:600;">Create Account</a>
                 </p>
-            </div>
-
-            <div class="login-welcome slide-in" style="display: none;">
-                <!-- Optional welcome message for larger screens -->
             </div>
         </div>
     </div>
 
+    <!-- ============================================================
+         FIX: script.js was included TWICE (duplicate tag).
+              Removed the second one. Having it twice caused all
+              event listeners and functions to initialize twice,
+              which could trigger double submissions and double alerts.
+    ============================================================ -->
     <script src="script.js"></script>
-    <script src="script.js"></script>
-<script>
+    <script>
 
-// ==========================
-// LOGIN FORM SUBMIT
-// ==========================
+    // ==========================
+    // LOGIN FORM SUBMIT
+    // ==========================
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
 
-document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        const email    = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
 
-    e.preventDefault();
+        try {
+            const formData = new URLSearchParams();
+            formData.append("username", email);
+            formData.append("password", password);
 
-    const email = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+            const response = await fetch("https://ngaturin-kappa.vercel.app/api/login", {
+                method:  "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body:    formData
+            });
 
-    try {
+            const data = await response.json();
 
-        const formData = new URLSearchParams();
-        formData.append("username", email);
-        formData.append("password", password);
+            if (!response.ok) throw new Error(data.detail || "Login failed");
 
-        const response = await fetch("https://ngaturin-kappa.vercel.app/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: formData
-        });
+            // Save token
+            localStorage.setItem("token", data.access_token);
 
-        const data = await response.json();
+            alert("Login successful!");
+            window.location.href = "selection.html";
 
-        if (!response.ok) {
-            throw new Error(data.detail || "Login failed");
+        } catch (error) {
+            alert(error.message);
         }
+    });
 
-        // SAVE TOKEN
-        localStorage.setItem("token", data.access_token);
-
-        alert("Login successful!");
-        window.location.href = "selection.html";
-
-    } catch (error) {
-        alert(error.message);
-    }
-
-});
-
-
-
-
-</script>
+    </script>
 </body>
-
 </html>

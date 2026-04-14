@@ -1,349 +1,134 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- ============================================================
+     REPLACEMENT for the <script> block at the bottom of
+     selection.html (lines 226-346 in the original file).
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Choose your financial tool">
-    <title>Welcome - Ngaturin</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        .selection-page {
-            min-height: 100vh;
-            background-image: url('assets/Backgound Green Grid (After Create Acc) Page).png');
-            background-size: cover;
-            background-position: center;
-            padding-top: 100px;
-        }
+     CHANGES:
+     1. Removed the second duplicate <script src="script.js"> tag
+        (was on both line 226 and line 228 in original).
+     2. Payment flow (WhatsApp redirect) is kept as-is — it still
+        works as a manual process. A note is added explaining
+        how to wire up Midtrans Snap properly when ready.
+     ============================================================ -->
 
-        .selection-header {
-            text-align: center;
-            margin-bottom: var(--spacing-3xl);
-        }
-
-        .selection-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--spacing-3xl);
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 var(--spacing-xl);
-        }
-
-        .selection-card {
-            background: var(--color-bg-alt);
-            border-radius: 24px;
-            padding: 32px;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            border: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .selection-card .btn {
-            margin-top: auto;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-
-        .selection-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-            border-color: var(--color-primary);
-        }
-
-        .selection-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: contain;
-            margin: 0 auto 24px;
-        }
-
-        .logo-top {
-            position: absolute;
-            top: var(--spacing-xl);
-            left: var(--spacing-xl);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            color: var(--color-dark);
-            font-weight: 700;
-            font-size: var(--font-size-xl);
-        }
-
-        .logo-top img {
-            width: 48px;
-            height: 48px;
-        }
-
-        .logout-btn {
-            position: absolute;
-            top: var(--spacing-xl);
-            right: var(--spacing-xl);
-        }
-
-        /* Responsive Fixes */
-        @media (max-width: 992px) {
-            .selection-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: var(--spacing-xl);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .selection-grid {
-                grid-template-columns: 1fr;
-                gap: var(--spacing-lg);
-            }
-            .selection-card img {
-                height: 140px;
-            }
-            .logo-top {
-                position: static;
-                justify-content: center;
-                margin-bottom: var(--spacing-xl);
-            }
-            .logout-btn {
-                top: 20px;
-                right: 20px;
-            }
-            .selection-page {
-                padding-top: 40px;
-            }
-            .selection-header h1 {
-                font-size: 1.8rem;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="selection-page">
-        <div class="logo-top">
-            <img src="assets/Logo Ngaturin.jpg" alt="Ngaturin Logo">
-            <span>Ngaturin</span>
-        </div>
-
-        <button class="btn btn-secondary logout-btn" onclick="logout()">Logout</button>
-
-        <div class="container">
-            <div class="selection-header fade-in">
-                <h1 style="color: var(--color-dark); margin-bottom: var(--spacing-md);">
-                    <i class="bi bi-grid-fill" style="color: var(--color-primary); margin-right: 8px;"></i>Welcome to Ngaturin!
-                </h1>
-                <p style="font-size: var(--font-size-xl); color: var(--color-text-light);">
-                    Choose how you'd like to manage your finances today
-                </p>
-            </div>
-
-            <div class="selection-grid">
-                <div class="selection-card slide-up" onclick="window.location.href='aicoach.html'">
-                    <img src="assets/AI Robot (Solution) Page.png" alt="AI Coach Robot">
-                    <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-md);">
-                        AI Coach
-                    </h3>
-                    <p style="color: var(--color-text-light); margin-bottom: var(--spacing-lg);">
-                        Your personal finance buddy here to answer all your money questions
-                    </p>
-                    <button class="btn btn-primary btn-large">Start Here</button>
-                </div>
-
-                <div class="selection-card slide-up" style="animation-delay: 0.2s;"
-                    onclick="window.location.href='goalsaver.html'">
-                    <img src="assets/Piggy Bank (Create Account and Goal Saver) Page.png" alt="Piggy Bank">
-                    <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-md);">
-                        Goal Saver
-                    </h3>
-                    <p style="color: var(--color-text-light); margin-bottom: var(--spacing-lg);">
-                        Set financial goals and track your savings progress step by step
-                    </p>
-                    <button class="btn btn-primary btn-large">Start Saving</button>
-                </div>
-
-                <!-- New Premium Feature: Pocket Notes -->
-                <div class="selection-card slide-up" style="animation-delay: 0.4s; position: relative; border: 2px solid gold; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.15);"
-                    onclick="handlePocketNotesClick()">
-                    <div
-                        style="position: absolute; top: -15px; right: -15px; background: gold; color: #5a4a00; padding: 5px 15px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transform: rotate(15deg); z-index: 1;">
-                        PREMIUM <i class="bi bi-gem"></i>
-                    </div>
-                    <img src="assets/money in pocket .jpeg" alt="Pocket Notes">
-                    <h3 style="color: #b8860b; margin-bottom: var(--spacing-md);">
-                        Pocket Notes
-                    </h3>
-                    <p style="color: var(--color-text-light); margin-bottom: var(--spacing-lg);">
-                        Organize your money into digital jars for smarter budgeting
-                    </p>
-                    <button class="btn btn-large" style="background: gold; color: #5a4a00; border: none; font-weight: 600; width: 100%;">Open Pockets</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="premiumModal" class="modal-overlay"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
-        <div class="modal-card"
-            style="background: white; padding: 40px; border-radius: 20px; text-align: left; max-width: 450px; width: 90%; position: relative;">
-            <button onclick="closeModal()"
-                style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
-            
-            <div style="text-align: center; font-size: 50px; margin-bottom: 10px;"><i class="bi bi-gem" style="color: gold;"></i></div>
-            <h2 style="color: var(--color-primary); text-align: center; margin-bottom: 10px;">Get Premium</h2>
-            <p style="color: var(--color-text-light); text-align: center; margin-bottom: 25px; font-size: 14px;">
-                Complete your details to unlock Digital Jars & Advanced Budgeting!
-            </p>
-
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 500; margin-bottom: 5px; color: var(--color-text);">Full Name</label>
-                <input type="text" id="premiumName" placeholder="e.g. John Doe" style="width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px;">
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 500; margin-bottom: 5px; color: var(--color-text);">Email Address</label>
-                <input type="email" id="premiumEmail" placeholder="john@example.com" style="width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px;">
-            </div>
-            <div class="form-group" style="margin-bottom: 25px;">
-                <label style="display: block; font-weight: 500; margin-bottom: 5px; color: var(--color-text);">Phone Number</label>
-                <input type="tel" id="premiumPhone" placeholder="0812xxxxxx" style="width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px;">
-            </div>
-
-            <button id="premiumBtn" class="btn btn-primary btn-large" onclick="unlockPremium()"
-                style="width: 100%; background: gold; color: #5a4a00; font-weight: 600; font-size: 16px;">
-                Proceed to Payment (Rp 25.000)
-            </button>
-        </div>
-    </div>
-
+    <!-- FIX: only ONE script.js tag -->
     <script src="script.js"></script>
 
-<script src="script.js"></script>
-
-<script>
-// ==========================
-// CHECK LOGIN
-// ==========================
-const token = localStorage.getItem("token");
-
-if (!token || token === "undefined" || token === "null") {
-    window.location.href = "login.html";
-}
-
-
-// ==========================
-// LOGOUT
-// ==========================
-function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "login.html";
-}
-
-
-// ==========================
-// POCKET NOTES (WITH PREMIUM)
-// ==========================
-function handlePocketNotesClick() {
+    <script>
+    // ==========================
+    // CHECK LOGIN
+    // ==========================
     const token = localStorage.getItem("token");
-    if (!token) {
+    if (!token || token === "undefined" || token === "null") {
         window.location.href = "login.html";
-        return;
     }
 
-    fetch("https://ngaturin-kappa.vercel.app/api/me", {
-        headers: { "Authorization": "Bearer " + token }
-    })
-    .then(async response => {
-        const data = await response.json();
-        if (!response.ok) {
-            alert("Sistem Backend Error! Mohon kirimkan foto error ini ke saya: " + JSON.stringify(data));
+
+    // ==========================
+    // LOGOUT
+    // ==========================
+    function logout() {
+        // FIX: use clearUserSession() from script.js so both
+        //      the token AND ngaturin_user data are cleared together.
+        clearUserSession();
+        window.location.href = "login.html";
+    }
+
+
+    // ==========================
+    // POCKET NOTES (WITH PREMIUM)
+    // ==========================
+    function handlePocketNotesClick() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            window.location.href = "login.html";
             return;
         }
-        
-        if (data.is_premium) {
-            window.location.href = "pocketnotes.html";
-        } else {
-            // show modal
-            document.getElementById('premiumModal').style.display = 'flex';
+
+        fetch("https://ngaturin-kappa.vercel.app/api/me", {
+            headers: { "Authorization": "Bearer " + token }
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                alert("Connection error: " + JSON.stringify(data));
+                return;
+            }
+            if (data.is_premium) {
+                window.location.href = "pocketnotes.html";
+            } else {
+                document.getElementById('premiumModal').style.display = 'flex';
+            }
+        })
+        .catch(err => {
+            console.error("Failed to fetch user status", err);
+            showToast("Error connecting to server", "error");
+        });
+    }
+
+
+    // ==========================
+    // CLOSE MODAL
+    // ==========================
+    function closeModal() {
+        document.getElementById('premiumModal').style.display = 'none';
+    }
+
+
+    // ==========================
+    // UNLOCK PREMIUM — WhatsApp flow
+    // ============================================================
+    // NOTE FOR DEVELOPERS:
+    // The current flow sends user details to an admin via WhatsApp
+    // so they can manually activate premium. This works but requires
+    // manual effort on every purchase.
+    //
+    // To fully automate with Midtrans Snap:
+    // 1. Add a backend endpoint POST /api/create-payment that:
+    //    - Creates an Order row in the DB
+    //    - Calls Midtrans Server-to-Server API to get a snap_token
+    //    - Returns { snap_token }
+    // 2. Load the Midtrans Snap JS:
+    //    <script src="https://app.midtrans.com/snap/snap.js"
+    //            data-client-key="YOUR_CLIENT_KEY"></script>
+    // 3. Replace the waUrl redirect below with:
+    //    snap.pay(snap_token, { onSuccess: () => { ... } });
+    //
+    // The backend webhook at POST /api/payment-handler already
+    // handles the settlement callback from Midtrans correctly.
+    // ============================================================
+    function unlockPremium() {
+        const name  = document.getElementById('premiumName').value.trim();
+        const email = document.getElementById('premiumEmail').value.trim();
+        const phone = document.getElementById('premiumPhone').value.trim();
+
+        if (!name || !email || !phone) {
+            showToast('Please fill in all details first!', 'error');
+            return;
         }
-    })
-    .catch(err => {
-        console.error("Failed to fetch user status", err);
-        showToast("Error connecting to server", "error");
-    });
-}
+        if (!email.includes('@') || !email.includes('.')) {
+            showToast('Please enter a valid email address.', 'error');
+            return;
+        }
 
+        const btn     = document.getElementById('premiumBtn');
+        btn.innerHTML = '<span>Redirecting...</span>';
+        btn.disabled  = true;
 
-// ==========================
-// CLOSE MODAL
-// ==========================
-function closeModal() {
-    document.getElementById('premiumModal').style.display = 'none';
-}
+        const adminPhone = "6282118313761";
+        const orderId    = email.split('@')[0];
+        const message    = `Hello Admin Ngaturin, I would like to make a payment to unlock the Premium Pocket Notes feature.\n\nName: ${name}\nEmail: ${email}\nPhone Number: ${phone}\nOrder ID: ${orderId}\n\nPlease provide the next steps for the payment process. Thank you!`;
+        const waUrl      = `https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(message)}`;
 
+        window.open(waUrl, '_blank');
+        showToast('Redirected to WhatsApp. Please complete the payment to proceed.', 'success');
 
-// ==========================
-// UNLOCK PREMIUM (TEST MODE)
-// ==========================
-function unlockPremium() {
-    // 1. Validate Form
-    const name = document.getElementById('premiumName').value.trim();
-    const email = document.getElementById('premiumEmail').value.trim();
-    const phone = document.getElementById('premiumPhone').value.trim();
-
-    if (!name || !email || !phone) {
-        showToast('Please fill in all details first!', 'error');
-        return;
+        setTimeout(() => {
+            closeModal();
+            btn.innerHTML = 'Proceed to Payment (Rp 25.000)';
+            btn.disabled  = false;
+            document.getElementById('premiumName').value  = '';
+            document.getElementById('premiumEmail').value = '';
+            document.getElementById('premiumPhone').value = '';
+        }, 1500);
     }
-
-    // Basic email validation
-    if (!email.includes('@') || !email.includes('.')) {
-        showToast('Please enter a valid email address.', 'error');
-        return;
-    }
-
-    const btn = document.getElementById('premiumBtn');
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Redirecting...';
-    btn.disabled = true;
-
-    // 2. Format WhatsApp Message
-    const adminPhone = "6282118313761";
-    const orderId = email.split('@')[0]; // Extract username without domain
-    const message = `Hello Admin Ngaturin, I would like to make a payment to unlock the Premium Pocket Notes feature. Here are my details:
-
-Name: ${name}
-Email: ${email}
-Phone Number: ${phone}
-Order ID: ${orderId}
-
-Please provide the next steps for the payment process. Thank you!`;
-
-    const waUrl = `https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(message)}`;
-
-    // 3. Redirect to WhatsApp
-    window.open(waUrl, '_blank');
-
-    showToast('Redirected to WhatsApp. Please complete the payment to proceed.', 'success');
-
-    setTimeout(() => {
-        closeModal();
-        btn.innerHTML = 'Proceed to Payment (Rp 25.000)';
-        btn.disabled = false;
-        
-        // Reset form for next time
-        document.getElementById('premiumName').value = '';
-        document.getElementById('premiumEmail').value = '';
-        document.getElementById('premiumPhone').value = '';
-    }, 1500);
-}
-</script>
-</body>
-
-</html>
+    </script>

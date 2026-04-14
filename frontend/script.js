@@ -2,58 +2,40 @@
 // Ngaturin - Main JavaScript
 // ========================================
 
-// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     initFAQ();
     initSmoothScroll();
     initNavbarHighlight();
 });
 
-// ========== FAQ Accordion ========== 
+// ========== FAQ Accordion ==========
 function initFAQ() {
     const faqItems = document.querySelectorAll('.faq-item');
-    
     faqItems.forEach(item => {
         const question = item.querySelector('.faq-question');
-        
         question.addEventListener('click', () => {
-            // Close other items
             faqItems.forEach(otherItem => {
                 if (otherItem !== item && otherItem.classList.contains('active')) {
                     otherItem.classList.remove('active');
                 }
             });
-            
-            // Toggle current item
             item.classList.toggle('active');
         });
     });
 }
 
-// ========== Smooth Scroll Navigation ========== 
+// ========== Smooth Scroll Navigation ==========
 function initSmoothScroll() {
     const navLinks = document.querySelectorAll('.navbar__link');
-    
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            
-            // Only handle hash links
             if (href && href.startsWith('#')) {
                 e.preventDefault();
-                const targetId = href.substring(1);
-                const targetElement = document.getElementById(targetId);
-                
+                const targetElement = document.getElementById(href.substring(1));
                 if (targetElement) {
                     const navbarHeight = document.querySelector('.navbar').offsetHeight;
-                    const targetPosition = targetElement.offsetTop - navbarHeight;
-                    
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
-                    });
-                    
-                    // Update active link
+                    window.scrollTo({ top: targetElement.offsetTop - navbarHeight, behavior: 'smooth' });
                     updateActiveNavLink(this);
                 }
             }
@@ -61,44 +43,33 @@ function initSmoothScroll() {
     });
 }
 
-// ========== Navbar Active Link Highlight ========== 
+// ========== Navbar Active Link Highlight ==========
 function initNavbarHighlight() {
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.navbar__link');
-    
     window.addEventListener('scroll', () => {
         let current = '';
         const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 80;
-        
         sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            
-            if (window.pageYOffset >= (sectionTop - navbarHeight - 100)) {
+            if (window.pageYOffset >= (section.offsetTop - navbarHeight - 100)) {
                 current = section.getAttribute('id');
             }
         });
-        
         navLinks.forEach(link => {
             link.classList.remove('active');
-            const href = link.getAttribute('href');
-            if (href === `#${current}`) {
-                link.classList.add('active');
-            }
+            if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
         });
     });
 }
 
 function updateActiveNavLink(activeLink) {
-    const navLinks = document.querySelectorAll('.navbar__link');
-    navLinks.forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.navbar__link').forEach(link => link.classList.remove('active'));
     activeLink.classList.add('active');
 }
 
-// ========== Form Validation Helper ========== 
+// ========== Form Validation Helper ==========
 function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function validatePassword(password) {
@@ -108,16 +79,12 @@ function validatePassword(password) {
 function showError(inputElement, message) {
     const formGroup = inputElement.closest('.form-group');
     let errorDiv = formGroup.querySelector('.error-message');
-    
     if (!errorDiv) {
         errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
-        errorDiv.style.color = '#D32F2F';
-        errorDiv.style.fontSize = 'var(--font-size-sm)';
-        errorDiv.style.marginTop = 'var(--spacing-xs)';
+        errorDiv.style.cssText = 'color:#D32F2F;font-size:var(--font-size-sm);margin-top:var(--spacing-xs);';
         formGroup.appendChild(errorDiv);
     }
-    
     errorDiv.textContent = message;
     inputElement.style.borderColor = '#D32F2F';
 }
@@ -125,90 +92,81 @@ function showError(inputElement, message) {
 function clearError(inputElement) {
     const formGroup = inputElement.closest('.form-group');
     const errorDiv = formGroup.querySelector('.error-message');
-    
-    if (errorDiv) {
-        errorDiv.remove();
-    }
-    
+    if (errorDiv) errorDiv.remove();
     inputElement.style.borderColor = 'var(--color-border)';
 }
 
-// ========== Toast Notification ========== 
+// ========== Toast Notification ==========
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.textContent = message;
-    
-    toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
-    toast.style.right = '20px';
-    toast.style.padding = 'var(--spacing-md) var(--spacing-lg)';
-    toast.style.borderRadius = 'var(--radius-md)';
-    toast.style.backgroundColor = type === 'success' ? 'var(--color-primary)' : '#D32F2F';
-    toast.style.color = 'white';
-    toast.style.boxShadow = 'var(--shadow-lg)';
-    toast.style.zIndex = '9999';
-    toast.style.animation = 'slideIn 0.3s ease';
-    
+    toast.style.cssText = `
+        position:fixed;bottom:20px;right:20px;
+        padding:var(--spacing-md) var(--spacing-lg);
+        border-radius:var(--radius-md);
+        background:${type === 'success' ? 'var(--color-primary)' : '#D32F2F'};
+        color:white;box-shadow:var(--shadow-lg);z-index:9999;
+        animation:slideIn 0.3s ease;
+    `;
     document.body.appendChild(toast);
-    
     setTimeout(() => {
         toast.style.animation = 'fadeOut 0.3s ease';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
 
-// ========== Session Management ========== 
+// ============================================================
+// SESSION MANAGEMENT
+//
+// FIX: Previously saveUserSession() wrote to sessionStorage but
+//      clearUserSession() and isLoggedIn() read from localStorage,
+//      so they were never in sync. Now all user-session helpers
+//      consistently use localStorage.
+// ============================================================
+
 function saveUserSession(userData) {
-    sessionStorage.setItem('ngaturin_user', JSON.stringify(userData));
+    // FIX: was sessionStorage — now localStorage so it persists and
+    //      matches what isLoggedIn() and clearUserSession() check.
+    localStorage.setItem('ngaturin_user', JSON.stringify(userData));
 }
 
 function getUserSession() {
-    const userData = sessionStorage.getItem('ngaturin_user');
+    const userData = localStorage.getItem('ngaturin_user');
     return userData ? JSON.parse(userData) : null;
 }
 
 function clearUserSession() {
-    localStorage.removeItem("token");
+    // FIX: now clears BOTH the token and the user data object.
+    //      Previously only the token was cleared, leaving stale user
+    //      data in sessionStorage forever.
+    localStorage.removeItem('token');
+    localStorage.removeItem('ngaturin_user');
 }
 
 function isLoggedIn() {
-    const token = localStorage.getItem("token");
-    return token && token !== "undefined" && token !== "null";
+    const token = localStorage.getItem('token');
+    return token && token !== 'undefined' && token !== 'null';
 }
 
 function getToken() {
-    return localStorage.getItem("token");
+    return localStorage.getItem('token');
 }
 
-// ========== API Helper Functions ========== 
+// ========== API Helper ==========
 async function apiRequest(endpoint, method = 'GET', data = null) {
     const options = {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-        }
+        method,
+        headers: { 'Content-Type': 'application/json' }
     };
-    
-    // --- TAMBAHAN BARU: Selipkan Karcis (Token) jika user sudah login ---
     const token = getToken();
-    if (token) {
-        options.headers['Authorization'] = `Bearer ${token}`;
-    }
-    // -------------------------------------------------------------------
+    if (token) options.headers['Authorization'] = `Bearer ${token}`;
+    if (data)  options.body = JSON.stringify(data);
 
-    if (data) {
-        options.body = JSON.stringify(data);
-    }
-    
     try {
         const response = await fetch(`https://ngaturin-kappa.vercel.app${endpoint}`, options);
-        const result = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(result.detail || result.message || 'Request failed');
-        }
-        
+        const result   = await response.json();
+        if (!response.ok) throw new Error(result.detail || result.message || 'Request failed');
         return result;
     } catch (error) {
         console.error('API Error:', error);
@@ -216,18 +174,12 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
     }
 }
 
-// Add fadeOut animation for toast
+// FadeOut animation for toast
 const style = document.createElement('style');
 style.textContent = `
     @keyframes fadeOut {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100px);
-        }
+        from { opacity:1; transform:translateX(0); }
+        to   { opacity:0; transform:translateX(100px); }
     }
 `;
 document.head.appendChild(style);
