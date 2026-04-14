@@ -333,6 +333,7 @@ p {
 .chat-messages {
     flex: 1; /* Memastikan kotak chat mengisi ruang kosong yang tersedia */
     overflow-y: auto; /* MEMUNCULKAN SCROLLBAR vertikal jika teks terlalu panjang */
+    min-height: 0;
     padding: 20px;
     padding-bottom: 80px; /* Jarak ekstra di bawah agar chat terakhir tidak tertutup kolom ketik */
     
