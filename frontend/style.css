@@ -331,12 +331,13 @@ p {
 }
 
 .chat-messages {
-  flex: 1;
-  padding: var(--spacing-lg);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+    flex: 1; /* Memastikan kotak chat mengisi ruang kosong yang tersedia */
+    overflow-y: auto; /* MEMUNCULKAN SCROLLBAR vertikal jika teks terlalu panjang */
+    padding: 20px;
+    padding-bottom: 80px; /* Jarak ekstra di bawah agar chat terakhir tidak tertutup kolom ketik */
+    
+    /* Opsional: Membuat scrollbar terlihat lebih rapi di Chrome/Edge */
+    scrollbar-width: thin; 
 }
 
 .chat-message {
