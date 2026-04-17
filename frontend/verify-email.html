@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+=============================================================
+NGATURIN — verify-email.html   [NEW FILE — [3] EMAIL VERIFICATION]
+=============================================================
+PURPOSE:
+  After a user registers, they are redirected here instead of
+  directly to login. They must enter the 6-digit OTP that was
+  emailed to them before their account is activated.
+
+HOW IT WORKS:
+  1. register.html saves the new user's email to sessionStorage
+     before redirecting here.
+  2. This page reads that email and shows it to the user.
+  3. User types the 6-digit OTP and clicks Verify.
+  4. We call POST /api/verify-email { email, otp }.
+  5. On success → redirect to login.html.
+  6. "Resend Code" button calls POST /api/resend-otp { email }.
+
+HOW TO TEST:
+  1. Register a new account.
+  2. Check the inbox of the email you registered with.
+  3. Enter the 6-digit code on this page.
+  4. You should see "Email verified!" and be sent to login.
+  5. Try logging in before verifying → you should see a
+     "Please verify your email" error message.
+=============================================================
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - Ngaturin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .verify-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #E8F4EA 0%, #F7F9F2 100%);
+            padding: var(--spacing-xl);
+        }
+        .verify-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        .otp-icon {
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+        }
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: var(--spacing-xl) 0;
+        }
+        .otp-inputs input {
+            width: 48px;
+            height: 56px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .otp-inputs input:focus {
+            border-color: var(--color-primary);
+        }
+        .otp-inputs input.filled {
+            border-color: var(--color-primary);
+            background: #f0faf0;
+        }
+        .resend-btn {
+            background: none;
+            border: none;
+            color: var(--color-primary);
+            cursor: pointer;
+            font-size: var(--font-size-sm);
+            text-decoration: underline;
+            margin-top: var(--spacing-md);
+        }
+        .resend-btn:disabled {
+            color: var(--color-text-light);
+            text-decoration: none;
+            cursor: not-allowed;
+        }
+        #statusMsg {
+            min-height: 24px;
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-sm);
+        }
+        .success-msg { color: #2e7d32; }
+        .error-msg   { color: #c62828; }
+    </style>
+</head>
+<body>
+    <div class="verify-page">
+        <div class="verify-card fade-in">
+            <div class="otp-icon"><i class="bi bi-envelope-check-fill"></i></div>
+            <h2 style="color:var(--color-dark);margin-bottom:var(--spacing-sm);">Check Your Email</h2>
+            <p style="color:var(--color-text-light);font-size:var(--font-size-sm);margin-bottom:var(--spacing-xs);">
+                We sent a 6-digit code to
+            </p>
+            <p id="emailDisplay" style="font-weight:600;color:var(--color-primary);margin-bottom:var(--spacing-md);">
+                your email
+            </p>
+            <p style="color:var(--color-text-light);font-size:var(--font-size-sm);">
+                Enter the code below to verify your account.
+            </p>
+
+            <!-- 6 individual digit boxes for better UX -->
+            <div class="otp-inputs">
+                <input type="text" maxlength="1" class="otp-digit" id="d0" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" id="d1" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" id="d2" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" id="d3" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" id="d4" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" id="d5" inputmode="numeric">
+            </div>
+
+            <div id="statusMsg"></div>
+
+            <button id="verifyBtn" class="btn btn-primary w-full btn-large mt-md" onclick="verifyOTP()">
+                Verify Email
+            </button>
+
+            <div style="margin-top:var(--spacing-lg);">
+                <p style="color:var(--color-text-light);font-size:var(--font-size-sm);">
+                    Didn't receive the code?
+                </p>
+                <button class="resend-btn" id="resendBtn" onclick="resendOTP()">
+                    Resend Code
+                </button>
+                <span id="resendTimer" style="font-size:var(--font-size-sm);color:var(--color-text-light);display:none;">
+                    (wait <span id="countdown">60</span>s)
+                </span>
+            </div>
+
+            <p style="margin-top:var(--spacing-lg);font-size:var(--font-size-sm);color:var(--color-text-light);">
+                Wrong email?
+                <a href="register.html" style="color:var(--color-primary);">Register again</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+    const API = "https://ngaturin-kappa.vercel.app";
+
+    // Read email that register.html stored before redirecting here
+    const pendingEmail = sessionStorage.getItem('pending_verify_email') || '';
+    if (!pendingEmail) {
+        // No email in session → user came here directly, send them to register
+        window.location.href = 'register.html';
+    }
+    document.getElementById('emailDisplay').textContent = pendingEmail;
+
+    // ── OTP input UX: auto-advance to next box as user types ──
+    document.querySelectorAll('.otp-digit').forEach((input, i, all) => {
+        input.addEventListener('input', (e) => {
+            // Only allow digits
+            input.value = input.value.replace(/\D/g, '');
+            if (input.value) {
+                input.classList.add('filled');
+                if (i < 5) all[i + 1].focus();   // move to next box
+            } else {
+                input.classList.remove('filled');
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            // Backspace on empty box → go back one box
+            if (e.key === 'Backspace' && !input.value && i > 0) {
+                all[i - 1].focus();
+                all[i - 1].value = '';
+                all[i - 1].classList.remove('filled');
+            }
+            // Enter on last box → submit
+            if (e.key === 'Enter') verifyOTP();
+        });
+        // Allow pasting a full OTP (e.g. from email app)
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData)
+                .getData('text').replace(/\D/g, '').substring(0, 6);
+            pasted.split('').forEach((ch, j) => {
+                if (all[j]) { all[j].value = ch; all[j].classList.add('filled'); }
+            });
+            all[Math.min(pasted.length, 5)].focus();
+        });
+    });
+
+    function getOTPValue() {
+        return Array.from(document.querySelectorAll('.otp-digit'))
+            .map(i => i.value).join('');
+    }
+
+    function setStatus(msg, type) {
+        const el = document.getElementById('statusMsg');
+        el.textContent  = msg;
+        el.className    = type === 'success' ? 'success-msg' : 'error-msg';
+    }
+
+    // ── Verify OTP ────────────────────────────────────────────
+    async function verifyOTP() {
+        const otp = getOTPValue();
+        if (otp.length < 6) {
+            setStatus('Please enter the complete 6-digit code.', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('verifyBtn');
+        btn.textContent = 'Verifying...';
+        btn.disabled    = true;
+
+        try {
+            const res = await fetch(`${API}/api/verify-email`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ email: pendingEmail, otp })
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setStatus(data.detail || 'Verification failed.', 'error');
+                btn.textContent = 'Verify Email';
+                btn.disabled    = false;
+                return;
+            }
+
+            setStatus('Email verified! Redirecting to login...', 'success');
+            sessionStorage.removeItem('pending_verify_email');   // clean up
+            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+
+        } catch (err) {
+            setStatus('Network error. Please try again.', 'error');
+            btn.textContent = 'Verify Email';
+            btn.disabled    = false;
+        }
+    }
+
+    // ── Resend OTP (with 60-second cooldown) ──────────────────
+    let resendCooldown = null;
+
+    async function resendOTP() {
+        const btn   = document.getElementById('resendBtn');
+        const timer = document.getElementById('resendTimer');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${API}/api/resend-otp`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ email: pendingEmail })
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setStatus(data.detail || 'Could not resend code.', 'error');
+                btn.disabled = false;
+                return;
+            }
+
+            setStatus('New code sent! Check your email.', 'success');
+
+            // Start 60-second cooldown before allowing resend again
+            let seconds = 60;
+            document.getElementById('countdown').textContent = seconds;
+            timer.style.display = 'inline';
+
+            resendCooldown = setInterval(() => {
+                seconds--;
+                document.getElementById('countdown').textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(resendCooldown);
+                    timer.style.display = 'none';
+                    btn.disabled = false;
+                }
+            }, 1000);
+
+        } catch (err) {
+            setStatus('Network error. Please try again.', 'error');
+            btn.disabled = false;
+        }
+    }
+    </script>
+</body>
+</html>

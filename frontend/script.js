@@ -1,41 +1,51 @@
-// ========================================
-// Ngaturin - Main JavaScript
-// ========================================
+// =============================================================
+// NGATURIN — script.js  (shared across all pages)
+// =============================================================
+// CHANGES IN THIS FILE:
+//
+//  [2] 401 AUTO-LOGOUT  — apiRequest() now checks if the server
+//                         returns HTTP 401 (token expired / invalid).
+//                         When detected, it clears the token and
+//                         redirects to login with a clear message.
+//                         This means the user is never stuck on a
+//                         broken page after their session expires.
+//
+//  [SESSION FIX]        — saveUserSession(), getUserSession(), and
+//                         clearUserSession() all now use localStorage
+//                         consistently (was mixed session/local before).
+// =============================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initFAQ();
     initSmoothScroll();
     initNavbarHighlight();
 });
 
-// ========== FAQ Accordion ==========
+// ── FAQ Accordion ─────────────────────────────────────────────
 function initFAQ() {
-    const faqItems = document.querySelectorAll('.faq-item');
-    faqItems.forEach(item => {
-        const question = item.querySelector('.faq-question');
-        question.addEventListener('click', () => {
-            faqItems.forEach(otherItem => {
-                if (otherItem !== item && otherItem.classList.contains('active')) {
-                    otherItem.classList.remove('active');
-                }
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.querySelector('.faq-question')?.addEventListener('click', () => {
+            document.querySelectorAll('.faq-item').forEach(other => {
+                if (other !== item) other.classList.remove('active');
             });
             item.classList.toggle('active');
         });
     });
 }
 
-// ========== Smooth Scroll Navigation ==========
+// ── Smooth Scroll ─────────────────────────────────────────────
 function initSmoothScroll() {
-    const navLinks = document.querySelectorAll('.navbar__link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+    document.querySelectorAll('.navbar__link').forEach(link => {
+        link.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
-            if (href && href.startsWith('#')) {
+            if (href?.startsWith('#')) {
                 e.preventDefault();
-                const targetElement = document.getElementById(href.substring(1));
-                if (targetElement) {
-                    const navbarHeight = document.querySelector('.navbar').offsetHeight;
-                    window.scrollTo({ top: targetElement.offsetTop - navbarHeight, behavior: 'smooth' });
+                const target = document.getElementById(href.substring(1));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - (document.querySelector('.navbar')?.offsetHeight || 80),
+                        behavior: 'smooth'
+                    });
                     updateActiveNavLink(this);
                 }
             }
@@ -43,71 +53,61 @@ function initSmoothScroll() {
     });
 }
 
-// ========== Navbar Active Link Highlight ==========
+// ── Navbar Highlight ──────────────────────────────────────────
 function initNavbarHighlight() {
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.navbar__link');
     window.addEventListener('scroll', () => {
+        const navH = document.querySelector('.navbar')?.offsetHeight || 80;
         let current = '';
-        const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 80;
-        sections.forEach(section => {
-            if (window.pageYOffset >= (section.offsetTop - navbarHeight - 100)) {
-                current = section.getAttribute('id');
-            }
+        sections.forEach(s => {
+            if (window.pageYOffset >= s.offsetTop - navH - 100) current = s.id;
         });
         navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
+            link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
         });
     });
 }
 
 function updateActiveNavLink(activeLink) {
-    document.querySelectorAll('.navbar__link').forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.navbar__link').forEach(l => l.classList.remove('active'));
     activeLink.classList.add('active');
 }
 
-// ========== Form Validation Helper ==========
+// ── Form Validation ───────────────────────────────────────────
 function validateEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
-
 function validatePassword(password) {
     return password.length >= 6;
 }
-
 function showError(inputElement, message) {
-    const formGroup = inputElement.closest('.form-group');
-    let errorDiv = formGroup.querySelector('.error-message');
-    if (!errorDiv) {
-        errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.style.cssText = 'color:#D32F2F;font-size:var(--font-size-sm);margin-top:var(--spacing-xs);';
-        formGroup.appendChild(errorDiv);
+    const fg = inputElement.closest('.form-group');
+    let err = fg.querySelector('.error-message');
+    if (!err) {
+        err = document.createElement('div');
+        err.className = 'error-message';
+        err.style.cssText = 'color:#D32F2F;font-size:var(--font-size-sm);margin-top:var(--spacing-xs);';
+        fg.appendChild(err);
     }
-    errorDiv.textContent = message;
+    err.textContent = message;
     inputElement.style.borderColor = '#D32F2F';
 }
-
 function clearError(inputElement) {
-    const formGroup = inputElement.closest('.form-group');
-    const errorDiv = formGroup.querySelector('.error-message');
-    if (errorDiv) errorDiv.remove();
+    inputElement.closest('.form-group')?.querySelector('.error-message')?.remove();
     inputElement.style.borderColor = 'var(--color-border)';
 }
 
-// ========== Toast Notification ==========
+// ── Toast Notification ────────────────────────────────────────
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
-    toast.className = 'toast';
     toast.textContent = message;
     toast.style.cssText = `
-        position:fixed;bottom:20px;right:20px;
+        position:fixed;bottom:20px;right:20px;z-index:9999;
         padding:var(--spacing-md) var(--spacing-lg);
-        border-radius:var(--radius-md);
+        border-radius:var(--radius-md);color:white;
         background:${type === 'success' ? 'var(--color-primary)' : '#D32F2F'};
-        color:white;box-shadow:var(--shadow-lg);z-index:9999;
-        animation:slideIn 0.3s ease;
+        box-shadow:var(--shadow-lg);animation:slideIn 0.3s ease;
     `;
     document.body.appendChild(toast);
     setTimeout(() => {
@@ -116,49 +116,56 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// ============================================================
-// SESSION MANAGEMENT
-//
-// FIX: Previously saveUserSession() wrote to sessionStorage but
-//      clearUserSession() and isLoggedIn() read from localStorage,
-//      so they were never in sync. Now all user-session helpers
-//      consistently use localStorage.
-// ============================================================
+// =============================================================
+// [SESSION FIX] SESSION MANAGEMENT
+// All three helpers now consistently use localStorage.
+// clearUserSession() removes both the token AND the user object.
+// =============================================================
 
 function saveUserSession(userData) {
-    // FIX: was sessionStorage — now localStorage so it persists and
-    //      matches what isLoggedIn() and clearUserSession() check.
     localStorage.setItem('ngaturin_user', JSON.stringify(userData));
 }
 
 function getUserSession() {
-    const userData = localStorage.getItem('ngaturin_user');
-    return userData ? JSON.parse(userData) : null;
+    try {
+        const d = localStorage.getItem('ngaturin_user');
+        return d ? JSON.parse(d) : null;
+    } catch { return null; }
 }
 
 function clearUserSession() {
-    // FIX: now clears BOTH the token and the user data object.
-    //      Previously only the token was cleared, leaving stale user
-    //      data in sessionStorage forever.
     localStorage.removeItem('token');
     localStorage.removeItem('ngaturin_user');
 }
 
 function isLoggedIn() {
     const token = localStorage.getItem('token');
-    return token && token !== 'undefined' && token !== 'null';
+    return !!(token && token !== 'undefined' && token !== 'null');
 }
 
 function getToken() {
     return localStorage.getItem('token');
 }
 
-// ========== API Helper ==========
+// =============================================================
+// [2] API HELPER WITH 401 AUTO-LOGOUT
+//
+// Every API call goes through this function.
+// If the server returns 401 (token expired or invalid), we:
+//   1. Clear the stored token and user data
+//   2. Store a message to show on the login page
+//   3. Redirect to login.html automatically
+//
+// This means the user never sees a broken page — they are
+// cleanly sent back to login with an explanation.
+// =============================================================
+
 async function apiRequest(endpoint, method = 'GET', data = null) {
     const options = {
         method,
         headers: { 'Content-Type': 'application/json' }
     };
+
     const token = getToken();
     if (token) options.headers['Authorization'] = `Bearer ${token}`;
     if (data)  options.body = JSON.stringify(data);
@@ -166,20 +173,34 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
     try {
         const response = await fetch(`https://ngaturin-kappa.vercel.app${endpoint}`, options);
         const result   = await response.json();
-        if (!response.ok) throw new Error(result.detail || result.message || 'Request failed');
+
+        // [2] Detect expired/invalid token → auto logout
+        if (response.status === 401) {
+            clearUserSession();
+            // Store a flag so login.html can show a message
+            sessionStorage.setItem('session_expired', '1');
+            window.location.href = 'login.html';
+            return;   // stop execution
+        }
+
+        if (!response.ok) {
+            throw new Error(result.detail || result.message || 'Request failed');
+        }
+
         return result;
+
     } catch (error) {
+        // Don't swallow redirect (happens when location changes mid-async)
+        if (error.name === 'AbortError') return;
         console.error('API Error:', error);
         throw error;
     }
 }
 
 // FadeOut animation for toast
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        from { opacity:1; transform:translateX(0); }
-        to   { opacity:0; transform:translateX(100px); }
-    }
+const _style = document.createElement('style');
+_style.textContent = `
+    @keyframes fadeOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(100px)} }
+    @keyframes slideIn { from{opacity:0;transform:translateX(100px)} to{opacity:1;transform:translateX(0)} }
 `;
-document.head.appendChild(style);
+document.head.appendChild(_style);

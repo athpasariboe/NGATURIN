@@ -1,9 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+=============================================================
+NGATURIN — login.html  (UPDATED)
+=============================================================
+CHANGES:
+  [2] Session expired banner — if the user was auto-logged-out
+      due to an expired token, a yellow banner is shown at the
+      top of the card explaining why they were redirected here.
+
+  [3] Unverified account message — if login returns 403
+      (account not yet verified), the error message now also
+      shows a "Resend Code" link that takes the user back to
+      verify-email.html.
+
+  [4] Forgot Password link — now actually links to
+      forgot-password.html instead of href="#".
+
+  [CLEAN] Removed the duplicate <script src="script.js"> tag.
+=============================================================
+-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sign in to your Ngaturin account">
     <title>Sign In - Ngaturin</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +43,7 @@
         .login-page::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            inset: 0;
             background-color: rgba(0, 0, 0, 0.3);
         }
         .login-container {
@@ -54,6 +73,29 @@
             font-size: var(--font-size-xl);
         }
         .logo-header img { width: 48px; height: 48px; }
+
+        /* [2] Session expired banner */
+        .session-banner {
+            background: #fff8e1;
+            border: 1px solid #f9a825;
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            font-size: var(--font-size-sm);
+            color: #e65100;
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .login-error {
+            background: #fdecea;
+            border: 1px solid #ef9a9a;
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            font-size: var(--font-size-sm);
+            color: #c62828;
+            margin-bottom: var(--spacing-md);
+        }
     </style>
 </head>
 <body>
@@ -65,8 +107,18 @@
 
         <div class="login-container">
             <div class="login-card fade-in">
-                <h2 class="mb-sm" style="color: var(--color-dark); font-size: var(--font-size-3xl);">Hallo Peps!</h2>
-                <p class="mb-xl" style="color: var(--color-text-light);">
+
+                <!-- [2] Session-expired banner (hidden by default, shown by JS if needed) -->
+                <div id="sessionBanner" class="session-banner" style="display:none;">
+                    <i class="bi bi-clock-history"></i>
+                    Your session expired. Please log in again.
+                </div>
+
+                <!-- Error message area -->
+                <div id="loginError" class="login-error" style="display:none;"></div>
+
+                <h2 class="mb-sm" style="color:var(--color-dark);font-size:var(--font-size-3xl);">Hallo Peps!</h2>
+                <p class="mb-xl" style="color:var(--color-text-light);">
                     Good to see you again!<br>
                     Let's make your financial journey easier today.
                 </p>
@@ -85,7 +137,10 @@
                             <input type="checkbox" id="remember" name="remember">
                             <label for="remember">Remember me</label>
                         </div>
-                        <a href="#" style="color:var(--color-text-light);font-size:var(--font-size-sm);">Forgot Password?</a>
+                        <!-- [4] Now actually links to forgot-password.html -->
+                        <a href="forgot-password.html" style="color:var(--color-text-light);font-size:var(--font-size-sm);">
+                            Forgot Password?
+                        </a>
                     </div>
                     <button type="submit" class="btn btn-primary w-full btn-large mt-md">Sign In</button>
                 </form>
@@ -98,23 +153,24 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         FIX: script.js was included TWICE (duplicate tag).
-              Removed the second one. Having it twice caused all
-              event listeners and functions to initialize twice,
-              which could trigger double submissions and double alerts.
-    ============================================================ -->
+    <!-- SINGLE script.js tag (was duplicated before) -->
     <script src="script.js"></script>
     <script>
 
-    // ==========================
-    // LOGIN FORM SUBMIT
-    // ==========================
+    // [2] Show session-expired banner if the user was auto-logged-out
+    if (sessionStorage.getItem('session_expired') === '1') {
+        document.getElementById('sessionBanner').style.display = 'flex';
+        sessionStorage.removeItem('session_expired');   // only show once
+    }
+
+    // ── LOGIN FORM ────────────────────────────────────────────
     document.getElementById("loginForm").addEventListener("submit", async function(e) {
         e.preventDefault();
 
         const email    = document.getElementById("username").value;
         const password = document.getElementById("password").value;
+        const errorEl  = document.getElementById("loginError");
+        errorEl.style.display = 'none';
 
         try {
             const formData = new URLSearchParams();
@@ -129,16 +185,29 @@
 
             const data = await response.json();
 
-            if (!response.ok) throw new Error(data.detail || "Login failed");
+            if (!response.ok) {
+                // [3] Special handling for unverified accounts (403 from backend)
+                if (response.status === 403) {
+                    errorEl.innerHTML = `
+                        ${data.detail}<br>
+                        <a href="verify-email.html"
+                           onclick="sessionStorage.setItem('pending_verify_email','${email}')"
+                           style="color:var(--color-primary);font-weight:600;">
+                           Re-enter verification code →
+                        </a>`;
+                } else {
+                    errorEl.textContent = data.detail || "Login failed";
+                }
+                errorEl.style.display = 'block';
+                return;
+            }
 
-            // Save token
             localStorage.setItem("token", data.access_token);
-
-            alert("Login successful!");
             window.location.href = "selection.html";
 
         } catch (error) {
-            alert(error.message);
+            errorEl.textContent    = "Network error. Please try again.";
+            errorEl.style.display  = 'block';
         }
     });
 
